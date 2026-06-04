@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lista della Spesa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #4caf50, #2e7d32);
+      color: white;
+      padding: 28px 24px 20px;
+      text-align: center;
+    }
+    .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
+    .header .date { font-size: 0.8rem; opacity: 0.85; margin-top: 4px; }
+
+    /* ── PROGRESS ── */
+    .progress-bar-wrap { padding: 14px 16px 10px; }
+    .progress-bar-wrap .label {
+      font-size: 0.75rem; color: #999; margin-bottom: 6px;
+      display: flex; justify-content: space-between;
+    }
+    .progress-bar { height: 6px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50, #81c784);
+      border-radius: 10px; width: 0%; transition: width 0.4s ease;
+    }
+
+    /* ── FILTRI CATEGORIE ── */
+    .filters {
+      padding: 0 16px 10px;
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .filter-btn {
+      border: none; border-radius: 20px; padding: 4px 12px;
+      font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+      background: #e8f5e9; color: #2e7d32; font-weight: 600;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: #4caf50; color: #fff;
+    }
+
+    /* ── LISTA ── */
+    .list { list-style: none; padding: 0 16px; }
+
+    .list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 10px; border-radius: 12px; cursor: pointer;
+      transition: background 0.2s; border-bottom: 1px solid #f0f0f0;
+      position: relative;
+    }
+    .list li:last-child { border-bottom: none; }
+    .list li:hover { background: #f9fbe7; }
+    .list li.checked { background: #f1f8f1; }
+    .list li.checked .item-name { text-decoration: line-through; color: #aaa; }
+    .list li.hidden { display: none; }
+
+    .checkbox {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid #4caf50; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: background 0.2s;
+    }
+    .list li.checked .checkbox { background: #4caf50; }
+    .checkbox::after {
+      content: '✓'; color: white; font-size: 0.75rem; font-weight: bold;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .list li.checked .checkbox::after { opacity: 1; }
+
+    .emoji { font-size: 1.2rem; flex-shrink: 0; }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-name { font-size: 0.92rem; font-weight: 500; color: #333; }
+    .item-brand { font-size: 0.72rem; color: #888; margin-top: 2px; text-transform: uppercase; }
+    .category-badge {
+      font-size: 0.65rem; font-weight: 700; border-radius: 8px;
+      padding: 2px 7px; white-space: nowrap; flex-shrink: 0;
+    }
+    .item-price {
+      font-weight: 700; font-size: 0.92rem; color: #2e7d32; white-space: nowrap;
+    }
+    .delete-btn {
+      background: none; border: none; cursor: pointer; font-size: 1rem;
+      color: #ccc; transition: color 0.2s; flex-shrink: 0; padding: 0 2px;
+      line-height: 1;
+    }
+    .delete-btn:hover { color: #e53935; }
+
+    /* ── FOOTER TOTALE ── */
+    .footer {
+      background: #f8f8f8; padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid #eee;
+    }
+    .footer .total-label { font-size: 0.9rem; color: #666; }
+    .footer .total-price { font-size: 1.3rem; font-weight: 800; color: #2e7d32; }
+
+    /* ── FORM AGGIUNGI ── */
+    .add-section {
+      padding: 14px 16px 18px;
+      border-top: 2px dashed #e0e0e0;
+      margin-top: 6px;
+    }
+    .add-section h3 {
+      font-size: 0.85rem; color: #777; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .add-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .add-form input, .add-form select {
+      border: 1.5px solid #ddd; border-radius: 10px;
+      padding: 9px 12px; font-size: 0.85rem; outline: none;
+      transition: border-color 0.2s; color: #333;
+      background: #fafafa;
+    }
+    .add-form input:focus, .add-form select:focus { border-color: #4caf50; background: #fff; }
+    .add-form .full { grid-column: 1 / -1; }
+    .add-btn {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #4caf50, #2e7d32);
+      color: white; border: none; border-radius: 10px;
+      padding: 11px; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.5px;
+    }
+    .add-btn:hover { opacity: 0.88; }
+
+    /* ── EMPTY STATE ── */
+    .empty-msg {
+      text-align: center; padding: 24px 0; color: #bbb;
+      font-size: 0.9rem; display: none;
+    }
+    .empty-msg .big { font-size: 2rem; display: block; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="icon">🛒</span>
+    <h1>Lista della Spesa</h1>
+    <div class="date" id="today-date"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="label">
+      <span id="progress-text">0 / 0 articoli</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <!-- FILTRI -->
+  <div class="filters" id="filters">
+    <button class="filter-btn active" onclick="filterBy('tutti', this)">🏷️ Tutti</button>
+  </div>
+
+  <!-- LISTA -->
+  <ul class="list" id="shopping-list"></ul>
+  <div class="empty-msg" id="empty-msg">
+    <span class="big">🛍️</span>Nessun articolo in questa categoria
+  </div>
+
+  <!-- TOTALE -->
+  <div class="footer">
+    <span class="total-label">Totale stimato</span>
+    <span class="total-price" id="total-price">€ 0,00</span>
+  </div>
+
+  <!-- FORM AGGIUNTA -->
+  <div class="add-section">
+    <h3>➕ Aggiungi articolo</h3>
+    <div class="add-form">
+      <input type="text"   id="new-name"   placeholder="Prodotto *" class="full" />
+      <input type="text"   id="new-brand"  placeholder="Marca (opz.)" />
+      <input type="number" id="new-price"  placeholder="Prezzo €" step="0.01" min="0" />
+      <select id="new-category">
+        <option value="">— Categoria —</option>
+        <option value="🥩 Carne">🥩 Carne</option>
+        <option value="🐟 Pesce">🐟 Pesce</option>
+        <option value="🥦 Verdura">🥦 Verdura</option>
+        <option value="🍎 Frutta">🍎 Frutta</option>
+        <option value="🧀 Latticini">🧀 Latticini</option>
+        <option value="🍝 Pasta & Cereali">🍝 Pasta & Cereali</option>
+        <option value="🍞 Pane & Bakery">🍞 Pane & Bakery</option>
+        <option value="🫒 Condimenti & Oli">🫒 Condimenti & Oli</option>
+        <option value="🍪 Snack & Dolci">🍪 Snack & Dolci</option>
+        <option value="🥂 Vini & Bollicine">🥂 Vini & Bollicine</option>
+        <option value="🍺 Birra & Bevande">🍺 Birra & Bevande</option>
+        <option value="🧴 Igiene Personale">🧴 Igiene Personale</option>
+        <option value="🧹 Pulizia Casa">🧹 Pulizia Casa</option>
+        <option value="🍼 Neonati & Bambini">🍼 Neonati & Bambini</option>
+        <option value="🐾 Animali">🐾 Animali</option>
+        <option value="💊 Farmacia">💊 Farmacia</option>
+        <option value="❓ Altro">❓ Altro</option>
+      </select>
+      <button class="add-btn" onclick="addItem()">Aggiungi alla lista</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const today = new Date();
+  document.getElementById('today-date').textContent =
+    today.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+
+  const catColors = {
+    "🥩 Carne":             { bg:'#fdecea', color:'#c62828' },
+    "🐟 Pesce":             { bg:'#e3f2fd', color:'#1565c0' },
+    "🥦 Verdura":           { bg:'#e8f5e9', color:'#2e7d32' },
+    "🍎 Frutta":            { bg:'#fff3e0', color:'#e65100' },
+    "🧀 Latticini":         { bg:'#fffde7', color:'#f9a825' },
+    "🍝 Pasta & Cereali":   { bg:'#fce4ec', color:'#880e4f' },
+    "🍞 Pane & Bakery":     { bg:'#efebe9', color:'#4e342e' },
+    "🫒 Condimenti & Oli":  { bg:'#f1f8e9', color:'#558b2f' },
+    "🍪 Snack & Dolci":     { bg:'#fff8e1', color:'#ff8f00' },
+    "🥂 Vini & Bollicine":  { bg:'#f3e5f5', color:'#6a1b9a' },
+    "🍺 Birra & Bevande":   { bg:'#e8eaf6', color:'#283593' },
+    "🧴 Igiene Personale":  { bg:'#e0f7fa', color:'#00695c' },
+    "🧹 Pulizia Casa":      { bg:'#e8eaf6', color:'#37474f' },
+    "🍼 Neonati & Bambini": { bg:'#fce4ec', color:'#c2185b' },
+    "🐾 Animali":           { bg:'#fff9c4', color:'#827717' },
+    "💊 Farmacia":          { bg:'#e8f5e9', color:'#1b5e20' },
+    "❓ Altro":             { bg:'#f5f5f5', color:'#616161' },
+  };
+
+  let items = [
+    { id:1,  name:'Tonno in lattine',        brand:'Riomare',    price:6.99, category:'🐟 Pesce' },
+    { id:2,  name:'Olio',                    brand:'Colombara',  price:5.99, category:'🫒 Condimenti & Oli' },
+    { id:3,  name:'Pasta',                   brand:'La Molisana',price:0.69, category:'🍝 Pasta & Cereali' },
+    { id:4,  name:'Gocciole',                brand:'Pavesi',     price:3.49, category:'🍪 Snack & Dolci' },
+    { id:5,  name:'Detersivo lavastoviglie', brand:'Finish',     price:9.99, category:'🧹 Pulizia Casa' },
+    { id:6,  name:'Prosecco',                brand:'Mionetto',   price:5.99, category:'🥂 Vini & Bollicine' },
+    { id:7,  name:'Cornetto',                brand:'Algida',     price:3.59, category:'🍪 Snack & Dolci' },
+    { id:8,  name:'Fiori di nasello',        brand:'Findus',     price:3.99, category:'🐟 Pesce' },
+    { id:9,  name:'Burro',                   brand:'Soresina',   price:1.95, category:'🧀 Latticini' },
+    { id:10, name:'Maionese / Salse varie',  brand:'Calvè',      price:1.99, category:'🫒 Condimenti & Oli' },
+  ];
+  let nextId = 11;
+  let checkedIds = new Set();
+  let activeFilter = 'tutti';
+
+  function render() {
+    const ul = document.getElementById('shopping-list');
+    ul.innerHTML = '';
+    const visible = items.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
+    document.getElementById('empty-msg').style.display = visible.length === 0 ? 'block' : 'none';
+    visible.forEach(item => {
+      const li = document.createElement('li');
+      if (checkedIds.has(item.id)) li.classList.add('checked');
+      const cat = catColors[item.category] || { bg:'#f5f5f5', color:'#666' };
+      li.innerHTML = `
+        <div class="checkbox"></div>
+        <div class="item-info">
+          <div class="item-name">${escHtml(item.name)}</div>
+          ${item.brand ? `<div class="item-brand">${escHtml(item.brand)}</div>` : ''}
+        </div>
+        ${item.category ? `<span class="category-badge" style="background:${cat.bg};color:${cat.color}">${item.category}</span>` : ''}
+        <span class="item-price">${item.price > 0 ? '€ ' + item.price.toFixed(2).replace('.',',') : '—'}</span>
+        <button class="delete-btn" title="Rimuovi" onclick="removeItem(event,${item.id})">✕</button>
+      `;
+      li.addEventListener('click', () => toggleCheck(item.id, li));
+      ul.appendChild(li);
+    });
+    updateProgress();
+    updateTotal();
+    renderFilters();
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function toggleCheck(id, li) {
+    if (checkedIds.has(id)) checkedIds.delete(id);
+    else checkedIds.add(id);
+    li.classList.toggle('checked');
+    updateProgress();
+    updateTotal();
+  }
+
+  function removeItem(e, id) {
+    e.stopPropagation();
+    items = items.filter(it => it.id !== id);
+    checkedIds.delete(id);
+    render();
+  }
+
+  function addItem() {
+    const name  = document.getElementById('new-name').value.trim();
+    const brand = document.getElementById('new-brand').value.trim();
+    const price = parseFloat(document.getElementById('new-price').value) || 0;
+    const cat   = document.getElementById('new-category').value;
+    if (!name) {
+      const inp = document.getElementById('new-name');
+      inp.focus();
+      inp.style.borderColor = '#e53935';
+      setTimeout(() => inp.style.borderColor = '#ddd', 1500);
+      return;
+    }
+    items.push({ id: nextId++, name, brand, price, category: cat });
+    document.getElementById('new-name').value  = '';
+    document.getElementById('new-brand').value = '';
+    document.getElementById('new-price').value = '';
+    document.getElementById('new-category').value = '';
+    render();
+    const ul = document.getElementById('shopping-list');
+    if (ul.lastElementChild) ul.lastElementChild.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.closest('.add-form')) addItem();
+  });
+
+  function renderFilters() {
+    const used = [...new Set(items.map(i => i.category).filter(Boolean))].sort();
+    const container = document.getElementById('filters');
+    container.innerHTML = `<button class="filter-btn ${activeFilter==='tutti'?'active':''}"
+      onclick="filterBy('tutti',this)">🏷️ Tutti (${items.length})</button>`;
+    used.forEach(cat => {
+      const count = items.filter(i => i.category === cat).length;
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn' + (activeFilter === cat ? ' active' : '');
+      btn.textContent = `${cat} (${count})`;
+      btn.onclick = function() { filterBy(cat, this); };
+      container.appendChild(btn);
+    });
+  }
+
+  function filterBy(cat, btn) {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function updateProgress() {
+    const visible = items.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
+    const total   = visible.length;
+    const checked = visible.filter(it => checkedIds.has(it.id)).length;
+    const pct     = total > 0 ? Math.round((checked / total) * 100) : 0;
+    document.getElementById('progress-text').textContent = `${checked} / ${total} articoli`;
+    document.getElementById('progress-pct').textContent  = `${pct}%`;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  function updateTotal() {
+    const total = items.reduce((s, it) => s + it.price, 0);
+    document.getElementById('total-price').textContent = '€ ' + total.toFixed(2).replace('.', ',');
+  }
+
+  render();
+</script>
+</body>
+</html>
