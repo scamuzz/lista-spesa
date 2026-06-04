@@ -2,10 +2,15 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Lista della Spesa</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+    }
 
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -14,7 +19,7 @@
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      padding: 40px 16px;
+      padding: 16px 8px;
     }
 
     .card {
@@ -30,22 +35,21 @@
     .header {
       background: linear-gradient(135deg, #4caf50, #2e7d32);
       color: white;
-      padding: 28px 24px 20px;
+      padding: 24px 16px 16px;
       text-align: center;
-      position: relative;
     }
-    .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
-    .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
-    .header .date { font-size: 0.8rem; opacity: 0.85; margin-top: 4px; }
+    .header .icon { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+    .header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
+    .header .date { font-size: 0.78rem; opacity: 0.85; margin-top: 4px; }
 
     /* ── SYNC STATUS ── */
     .sync-status {
       display: flex; align-items: center; justify-content: center;
-      gap: 6px; font-size: 0.75rem; margin-top: 8px; opacity: 0.9;
+      gap: 6px; font-size: 0.72rem; margin-top: 8px; opacity: 0.9;
     }
     .sync-dot {
       width: 8px; height: 8px; border-radius: 50%;
-      background: #fff; animation: pulse 1.5s infinite;
+      background: #fff; animation: pulse 1.5s infinite; flex-shrink: 0;
     }
     .sync-dot.connected { background: #a5d6a7; animation: none; }
     .sync-dot.error     { background: #ef9a9a; animation: none; }
@@ -54,9 +58,9 @@
     }
 
     /* ── PROGRESS ── */
-    .progress-bar-wrap { padding: 14px 16px 10px; }
+    .progress-bar-wrap { padding: 12px 14px 8px; }
     .progress-bar-wrap .label {
-      font-size: 0.75rem; color: #999; margin-bottom: 6px;
+      font-size: 0.73rem; color: #999; margin-bottom: 6px;
       display: flex; justify-content: space-between;
     }
     .progress-bar { height: 6px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
@@ -68,23 +72,24 @@
 
     /* ── FILTRI ── */
     .filters {
-      padding: 0 16px 10px;
-      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 0 14px 10px;
+      display: flex; flex-wrap: wrap; gap: 5px;
     }
     .filter-btn {
-      border: none; border-radius: 20px; padding: 4px 12px;
-      font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+      border: none; border-radius: 20px; padding: 4px 10px;
+      font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
       background: #e8f5e9; color: #2e7d32; font-weight: 600;
+      white-space: nowrap;
     }
     .filter-btn.active, .filter-btn:hover { background: #4caf50; color: #fff; }
 
     /* ── LISTA ── */
-    .list { list-style: none; padding: 0 16px; }
+    .list { list-style: none; padding: 0 10px; }
     .list li {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 10px; border-radius: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 8px; border-radius: 12px; cursor: pointer;
       transition: background 0.2s; border-bottom: 1px solid #f0f0f0;
-      position: relative;
+      min-width: 0;
     }
     .list li:last-child { border-bottom: none; }
     .list li:hover { background: #f9fbe7; }
@@ -92,58 +97,74 @@
     .list li.checked .item-name { text-decoration: line-through; color: #aaa; }
 
     .checkbox {
-      width: 24px; height: 24px; border-radius: 50%;
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
       border: 2px solid #4caf50; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; transition: background 0.2s;
+      justify-content: center; transition: background 0.2s;
     }
     .list li.checked .checkbox { background: #4caf50; }
     .checkbox::after {
-      content: '✓'; color: white; font-size: 0.75rem; font-weight: bold;
+      content: '✓'; color: white; font-size: 0.7rem; font-weight: bold;
       opacity: 0; transition: opacity 0.2s;
     }
     .list li.checked .checkbox::after { opacity: 1; }
 
-    .item-info { flex: 1; min-width: 0; }
-    .item-name { font-size: 0.92rem; font-weight: 500; color: #333; }
-    .item-brand { font-size: 0.72rem; color: #888; margin-top: 2px; text-transform: uppercase; }
+    .item-info { flex: 1; min-width: 0; overflow: hidden; }
+    .item-name {
+      font-size: 0.88rem; font-weight: 500; color: #333;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item-brand {
+      font-size: 0.7rem; color: #888; margin-top: 1px;
+      text-transform: uppercase; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
 
     .category-badge {
-      font-size: 0.65rem; font-weight: 700; border-radius: 8px;
-      padding: 2px 7px; white-space: nowrap; flex-shrink: 0;
+      font-size: 0.6rem; font-weight: 700; border-radius: 8px;
+      padding: 2px 6px; white-space: nowrap; flex-shrink: 0;
+      max-width: 90px; overflow: hidden; text-overflow: ellipsis;
     }
+
+    /* nasconde badge su schermi piccoli per evitare overflow */
+    @media (max-width: 360px) {
+      .category-badge { display: none; }
+    }
+
     .item-price {
-      font-weight: 700; font-size: 0.92rem; color: #2e7d32; white-space: nowrap;
+      font-weight: 700; font-size: 0.85rem; color: #2e7d32;
+      white-space: nowrap; flex-shrink: 0;
     }
     .delete-btn {
-      background: none; border: none; cursor: pointer; font-size: 1rem;
-      color: #ccc; transition: color 0.2s; flex-shrink: 0; padding: 0 2px; line-height: 1;
+      background: none; border: none; cursor: pointer; font-size: 0.95rem;
+      color: #ccc; transition: color 0.2s; flex-shrink: 0;
+      padding: 0 2px; line-height: 1; touch-action: manipulation;
     }
     .delete-btn:hover { color: #e53935; }
 
     /* ── FOOTER ── */
     .footer {
-      background: #f8f8f8; padding: 14px 24px;
+      background: #f8f8f8; padding: 12px 16px;
       display: flex; justify-content: space-between; align-items: center;
       border-top: 1px solid #eee;
     }
-    .footer .total-label { font-size: 0.9rem; color: #666; }
-    .footer .total-price { font-size: 1.3rem; font-weight: 800; color: #2e7d32; }
+    .footer .total-label { font-size: 0.88rem; color: #666; }
+    .footer .total-price { font-size: 1.2rem; font-weight: 800; color: #2e7d32; }
 
     /* ── FORM AGGIUNGI ── */
     .add-section {
-      padding: 14px 16px 18px;
+      padding: 12px 14px 16px;
       border-top: 2px dashed #e0e0e0;
-      margin-top: 6px;
     }
     .add-section h3 {
-      font-size: 0.85rem; color: #777; margin-bottom: 10px;
+      font-size: 0.82rem; color: #777; margin-bottom: 10px;
       text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .add-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .add-form { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     .add-form input, .add-form select {
       border: 1.5px solid #ddd; border-radius: 10px;
-      padding: 9px 12px; font-size: 0.85rem; outline: none;
+      padding: 9px 10px; font-size: 0.83rem; outline: none;
       transition: border-color 0.2s; color: #333; background: #fafafa;
+      width: 100%; min-width: 0;
     }
     .add-form input:focus, .add-form select:focus { border-color: #4caf50; background: #fff; }
     .add-form .full { grid-column: 1 / -1; }
@@ -151,34 +172,37 @@
       grid-column: 1 / -1;
       background: linear-gradient(135deg, #4caf50, #2e7d32);
       color: white; border: none; border-radius: 10px;
-      padding: 11px; font-size: 0.95rem; font-weight: 700;
-      cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.5px;
+      padding: 12px; font-size: 0.93rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
+      touch-action: manipulation;
     }
     .add-btn:hover { opacity: 0.88; }
     .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ── SVUOTA LISTA ── */
+    /* ── SVUOTA ── */
     .clear-btn {
-      display: block; width: calc(100% - 32px); margin: 0 16px 16px;
+      display: block; width: calc(100% - 28px); margin: 0 14px 14px;
       background: none; border: 1.5px solid #ffcdd2; border-radius: 10px;
-      color: #e53935; padding: 9px; font-size: 0.82rem; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
+      color: #e53935; padding: 9px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; touch-action: manipulation;
     }
     .clear-btn:hover { background: #ffebee; }
 
     /* ── EMPTY ── */
     .empty-msg {
       text-align: center; padding: 24px 0; color: #bbb;
-      font-size: 0.9rem; display: none;
+      font-size: 0.88rem; display: none;
     }
     .empty-msg .big { font-size: 2rem; display: block; margin-bottom: 6px; }
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-      background: #323232; color: #fff; padding: 10px 20px; border-radius: 20px;
-      font-size: 0.85rem; font-weight: 500; transition: transform 0.3s ease;
-      z-index: 999; white-space: nowrap;
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #323232; color: #fff; padding: 10px 20px;
+      border-radius: 20px; font-size: 0.83rem; font-weight: 500;
+      transition: transform 0.3s ease; z-index: 999;
+      white-space: nowrap; max-width: calc(100vw - 32px);
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
@@ -219,9 +243,9 @@
   <div class="add-section">
     <h3>➕ Aggiungi articolo</h3>
     <div class="add-form">
-      <input type="text"   id="new-name"   placeholder="Prodotto *" class="full" />
-      <input type="text"   id="new-brand"  placeholder="Marca (opz.)" />
-      <input type="number" id="new-price"  placeholder="Prezzo €" step="0.01" min="0" />
+      <input type="text"   id="new-name"     placeholder="Prodotto *" class="full" />
+      <input type="text"   id="new-brand"    placeholder="Marca (opz.)" />
+      <input type="number" id="new-price"    placeholder="Prezzo €" step="0.01" min="0" />
       <select id="new-category">
         <option value="">— Categoria —</option>
         <option value="🥩 Carne">🥩 Carne</option>
@@ -256,7 +280,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-  // ── FIREBASE CONFIG ───────────────────────────────────
   const firebaseConfig = {
     apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
     authDomain: "lista-spesa-b9eb1.firebaseapp.com",
@@ -272,11 +295,9 @@
   const db       = firebase.database();
   const itemsRef = db.ref('items');
 
-  // ── STATO ─────────────────────────────────────────────
-  let items        = {};   // { firebaseKey: { name, brand, price, category, checked } }
+  let items        = {};
   let activeFilter = 'tutti';
 
-  // ── COLORI CATEGORIE ──────────────────────────────────
   const catColors = {
     "🥩 Carne":             { bg:'#fdecea', color:'#c62828' },
     "🐟 Pesce":             { bg:'#e3f2fd', color:'#1565c0' },
@@ -297,47 +318,40 @@
     "❓ Altro":             { bg:'#f5f5f5', color:'#616161' },
   };
 
-  // ── DATA ──────────────────────────────────────────────
   const today = new Date();
   document.getElementById('today-date').textContent =
     today.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
 
-  // ── CONNESSIONE FIREBASE ──────────────────────────────
   db.ref('.info/connected').on('value', snap => {
     const dot   = document.getElementById('sync-dot');
     const label = document.getElementById('sync-label');
     if (snap.val()) {
-      dot.className   = 'sync-dot connected';
+      dot.className     = 'sync-dot connected';
       label.textContent = '🟢 Sincronizzato in tempo reale';
     } else {
-      dot.className   = 'sync-dot error';
+      dot.className     = 'sync-dot error';
       label.textContent = '🔴 Offline — riconnessione...';
     }
   });
 
-  // ── ASCOLTO DATI IN TEMPO REALE ───────────────────────
   itemsRef.on('value', snap => {
     items = snap.val() || {};
     render();
   });
 
-  // ── RENDER ────────────────────────────────────────────
   function render() {
     const ul = document.getElementById('shopping-list');
     ul.innerHTML = '';
-
     const entries = Object.entries(items);
     const visible = entries.filter(([k, it]) =>
       activeFilter === 'tutti' || it.category === activeFilter
     );
-
     document.getElementById('empty-msg').style.display = visible.length === 0 ? 'block' : 'none';
 
     visible.forEach(([key, item]) => {
-      const li = document.createElement('li');
+      const li  = document.createElement('li');
       if (item.checked) li.classList.add('checked');
       const cat = catColors[item.category] || { bg:'#f5f5f5', color:'#666' };
-
       li.innerHTML = `
         <div class="checkbox"></div>
         <div class="item-info">
@@ -362,19 +376,16 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── TOGGLE CHECK ──────────────────────────────────────
   function toggleCheck(key, item) {
     itemsRef.child(key).update({ checked: !item.checked });
   }
 
-  // ── RIMUOVI ───────────────────────────────────────────
   function removeItem(e, key) {
     e.stopPropagation();
     itemsRef.child(key).remove();
     showToast('Articolo rimosso');
   }
 
-  // ── SVUOTA SPUNTATI ───────────────────────────────────
   function clearChecked() {
     const toRemove = Object.entries(items).filter(([k, it]) => it.checked);
     if (toRemove.length === 0) { showToast('Nessun articolo spuntato'); return; }
@@ -384,7 +395,6 @@
     showToast(`${toRemove.length} articolo/i rimosso/i`);
   }
 
-  // ── AGGIUNGI ──────────────────────────────────────────
   function addItem() {
     const name  = document.getElementById('new-name').value.trim();
     const brand = document.getElementById('new-brand').value.trim();
@@ -403,9 +413,9 @@
 
     itemsRef.push({ name, brand, price, category: cat, checked: false })
       .then(() => {
-        document.getElementById('new-name').value    = '';
-        document.getElementById('new-brand').value   = '';
-        document.getElementById('new-price').value   = '';
+        document.getElementById('new-name').value     = '';
+        document.getElementById('new-brand').value    = '';
+        document.getElementById('new-price').value    = '';
         document.getElementById('new-category').value = '';
         showToast('✅ Articolo aggiunto!');
       })
@@ -417,17 +427,16 @@
     if (e.key === 'Enter' && document.activeElement.closest('.add-form')) addItem();
   });
 
-  // ── FILTRI ────────────────────────────────────────────
   function renderFilters() {
-    const entries = Object.values(items);
-    const used = [...new Set(entries.map(i => i.category).filter(Boolean))].sort();
+    const entries  = Object.values(items);
+    const used     = [...new Set(entries.map(i => i.category).filter(Boolean))].sort();
     const container = document.getElementById('filters');
     container.innerHTML = `<button class="filter-btn ${activeFilter==='tutti'?'active':''}"
       onclick="filterBy('tutti',this)">🏷️ Tutti (${entries.length})</button>`;
     used.forEach(cat => {
       const count = entries.filter(i => i.category === cat).length;
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn' + (activeFilter === cat ? ' active' : '');
+      const btn   = document.createElement('button');
+      btn.className   = 'filter-btn' + (activeFilter === cat ? ' active' : '');
       btn.textContent = `${cat} (${count})`;
       btn.onclick = function() { filterBy(cat, this); };
       container.appendChild(btn);
@@ -441,7 +450,6 @@
     render();
   }
 
-  // ── PROGRESS ──────────────────────────────────────────
   function updateProgress() {
     const all     = Object.values(items);
     const visible = all.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
@@ -453,14 +461,12 @@
     document.getElementById('progress-fill').style.width = pct + '%';
   }
 
-  // ── TOTALE ────────────────────────────────────────────
   function updateTotal() {
     const total = Object.values(items).reduce((s, it) => s + Number(it.price || 0), 0);
     document.getElementById('total-price').textContent =
       '€ ' + total.toFixed(2).replace('.', ',');
   }
 
-  // ── TOAST ─────────────────────────────────────────────
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
