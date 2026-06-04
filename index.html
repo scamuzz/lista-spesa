@@ -32,10 +32,26 @@
       color: white;
       padding: 28px 24px 20px;
       text-align: center;
+      position: relative;
     }
     .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
     .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
     .header .date { font-size: 0.8rem; opacity: 0.85; margin-top: 4px; }
+
+    /* ── SYNC STATUS ── */
+    .sync-status {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; font-size: 0.75rem; margin-top: 8px; opacity: 0.9;
+    }
+    .sync-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #fff; animation: pulse 1.5s infinite;
+    }
+    .sync-dot.connected { background: #a5d6a7; animation: none; }
+    .sync-dot.error     { background: #ef9a9a; animation: none; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
 
     /* ── PROGRESS ── */
     .progress-bar-wrap { padding: 14px 16px 10px; }
@@ -50,7 +66,7 @@
       border-radius: 10px; width: 0%; transition: width 0.4s ease;
     }
 
-    /* ── FILTRI CATEGORIE ── */
+    /* ── FILTRI ── */
     .filters {
       padding: 0 16px 10px;
       display: flex; flex-wrap: wrap; gap: 6px;
@@ -60,13 +76,10 @@
       font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
       background: #e8f5e9; color: #2e7d32; font-weight: 600;
     }
-    .filter-btn.active, .filter-btn:hover {
-      background: #4caf50; color: #fff;
-    }
+    .filter-btn.active, .filter-btn:hover { background: #4caf50; color: #fff; }
 
     /* ── LISTA ── */
     .list { list-style: none; padding: 0 16px; }
-
     .list li {
       display: flex; align-items: center; gap: 10px;
       padding: 12px 10px; border-radius: 12px; cursor: pointer;
@@ -77,7 +90,6 @@
     .list li:hover { background: #f9fbe7; }
     .list li.checked { background: #f1f8f1; }
     .list li.checked .item-name { text-decoration: line-through; color: #aaa; }
-    .list li.hidden { display: none; }
 
     .checkbox {
       width: 24px; height: 24px; border-radius: 50%;
@@ -91,11 +103,10 @@
     }
     .list li.checked .checkbox::after { opacity: 1; }
 
-    .emoji { font-size: 1.2rem; flex-shrink: 0; }
-
     .item-info { flex: 1; min-width: 0; }
     .item-name { font-size: 0.92rem; font-weight: 500; color: #333; }
     .item-brand { font-size: 0.72rem; color: #888; margin-top: 2px; text-transform: uppercase; }
+
     .category-badge {
       font-size: 0.65rem; font-weight: 700; border-radius: 8px;
       padding: 2px 7px; white-space: nowrap; flex-shrink: 0;
@@ -105,12 +116,11 @@
     }
     .delete-btn {
       background: none; border: none; cursor: pointer; font-size: 1rem;
-      color: #ccc; transition: color 0.2s; flex-shrink: 0; padding: 0 2px;
-      line-height: 1;
+      color: #ccc; transition: color 0.2s; flex-shrink: 0; padding: 0 2px; line-height: 1;
     }
     .delete-btn:hover { color: #e53935; }
 
-    /* ── FOOTER TOTALE ── */
+    /* ── FOOTER ── */
     .footer {
       background: #f8f8f8; padding: 14px 24px;
       display: flex; justify-content: space-between; align-items: center;
@@ -129,16 +139,11 @@
       font-size: 0.85rem; color: #777; margin-bottom: 10px;
       text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .add-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
+    .add-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .add-form input, .add-form select {
       border: 1.5px solid #ddd; border-radius: 10px;
       padding: 9px 12px; font-size: 0.85rem; outline: none;
-      transition: border-color 0.2s; color: #333;
-      background: #fafafa;
+      transition: border-color 0.2s; color: #333; background: #fafafa;
     }
     .add-form input:focus, .add-form select:focus { border-color: #4caf50; background: #fff; }
     .add-form .full { grid-column: 1 / -1; }
@@ -150,27 +155,47 @@
       cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.5px;
     }
     .add-btn:hover { opacity: 0.88; }
+    .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ── EMPTY STATE ── */
+    /* ── SVUOTA LISTA ── */
+    .clear-btn {
+      display: block; width: calc(100% - 32px); margin: 0 16px 16px;
+      background: none; border: 1.5px solid #ffcdd2; border-radius: 10px;
+      color: #e53935; padding: 9px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .clear-btn:hover { background: #ffebee; }
+
+    /* ── EMPTY ── */
     .empty-msg {
       text-align: center; padding: 24px 0; color: #bbb;
       font-size: 0.9rem; display: none;
     }
     .empty-msg .big { font-size: 2rem; display: block; margin-bottom: 6px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #323232; color: #fff; padding: 10px 20px; border-radius: 20px;
+      font-size: 0.85rem; font-weight: 500; transition: transform 0.3s ease;
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
 <div class="card">
-
-  <!-- HEADER -->
   <div class="header">
     <span class="icon">🛒</span>
     <h1>Lista della Spesa</h1>
     <div class="date" id="today-date"></div>
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Connessione in corso...</span>
+    </div>
   </div>
 
-  <!-- PROGRESS -->
   <div class="progress-bar-wrap">
     <div class="label">
       <span id="progress-text">0 / 0 articoli</span>
@@ -179,24 +204,18 @@
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   </div>
 
-  <!-- FILTRI -->
-  <div class="filters" id="filters">
-    <button class="filter-btn active" onclick="filterBy('tutti', this)">🏷️ Tutti</button>
-  </div>
+  <div class="filters" id="filters"></div>
 
-  <!-- LISTA -->
   <ul class="list" id="shopping-list"></ul>
   <div class="empty-msg" id="empty-msg">
     <span class="big">🛍️</span>Nessun articolo in questa categoria
   </div>
 
-  <!-- TOTALE -->
   <div class="footer">
     <span class="total-label">Totale stimato</span>
     <span class="total-price" id="total-price">€ 0,00</span>
   </div>
 
-  <!-- FORM AGGIUNTA -->
   <div class="add-section">
     <h3>➕ Aggiungi articolo</h3>
     <div class="add-form">
@@ -223,17 +242,41 @@
         <option value="💊 Farmacia">💊 Farmacia</option>
         <option value="❓ Altro">❓ Altro</option>
       </select>
-      <button class="add-btn" onclick="addItem()">Aggiungi alla lista</button>
+      <button class="add-btn" id="add-btn" onclick="addItem()">Aggiungi alla lista</button>
     </div>
   </div>
 
+  <button class="clear-btn" onclick="clearChecked()">🗑️ Rimuovi articoli spuntati</button>
 </div>
 
-<script>
-  const today = new Date();
-  document.getElementById('today-date').textContent =
-    today.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
+<div class="toast" id="toast"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  // ── FIREBASE CONFIG ───────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
+    authDomain: "lista-spesa-b9eb1.firebaseapp.com",
+    databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lista-spesa-b9eb1",
+    storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
+    messagingSenderId: "468690890938",
+    appId: "1:468690890938:web:048be7f27779d8862d9283",
+    measurementId: "G-5MMJ2MXX5E"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db       = firebase.database();
+  const itemsRef = db.ref('items');
+
+  // ── STATO ─────────────────────────────────────────────
+  let items        = {};   // { firebaseKey: { name, brand, price, category, checked } }
+  let activeFilter = 'tutti';
+
+  // ── COLORI CATEGORIE ──────────────────────────────────
   const catColors = {
     "🥩 Carne":             { bg:'#fdecea', color:'#c62828' },
     "🐟 Pesce":             { bg:'#e3f2fd', color:'#1565c0' },
@@ -254,101 +297,135 @@
     "❓ Altro":             { bg:'#f5f5f5', color:'#616161' },
   };
 
-  let items = [
-    { id:1,  name:'Tonno in lattine',        brand:'Riomare',    price:6.99, category:'🐟 Pesce' },
-    { id:2,  name:'Olio',                    brand:'Colombara',  price:5.99, category:'🫒 Condimenti & Oli' },
-    { id:3,  name:'Pasta',                   brand:'La Molisana',price:0.69, category:'🍝 Pasta & Cereali' },
-    { id:4,  name:'Gocciole',                brand:'Pavesi',     price:3.49, category:'🍪 Snack & Dolci' },
-    { id:5,  name:'Detersivo lavastoviglie', brand:'Finish',     price:9.99, category:'🧹 Pulizia Casa' },
-    { id:6,  name:'Prosecco',                brand:'Mionetto',   price:5.99, category:'🥂 Vini & Bollicine' },
-    { id:7,  name:'Cornetto',                brand:'Algida',     price:3.59, category:'🍪 Snack & Dolci' },
-    { id:8,  name:'Fiori di nasello',        brand:'Findus',     price:3.99, category:'🐟 Pesce' },
-    { id:9,  name:'Burro',                   brand:'Soresina',   price:1.95, category:'🧀 Latticini' },
-    { id:10, name:'Maionese / Salse varie',  brand:'Calvè',      price:1.99, category:'🫒 Condimenti & Oli' },
-  ];
-  let nextId = 11;
-  let checkedIds = new Set();
-  let activeFilter = 'tutti';
+  // ── DATA ──────────────────────────────────────────────
+  const today = new Date();
+  document.getElementById('today-date').textContent =
+    today.toLocaleDateString('it-IT', { day:'numeric', month:'long', year:'numeric' });
 
+  // ── CONNESSIONE FIREBASE ──────────────────────────────
+  db.ref('.info/connected').on('value', snap => {
+    const dot   = document.getElementById('sync-dot');
+    const label = document.getElementById('sync-label');
+    if (snap.val()) {
+      dot.className   = 'sync-dot connected';
+      label.textContent = '🟢 Sincronizzato in tempo reale';
+    } else {
+      dot.className   = 'sync-dot error';
+      label.textContent = '🔴 Offline — riconnessione...';
+    }
+  });
+
+  // ── ASCOLTO DATI IN TEMPO REALE ───────────────────────
+  itemsRef.on('value', snap => {
+    items = snap.val() || {};
+    render();
+  });
+
+  // ── RENDER ────────────────────────────────────────────
   function render() {
     const ul = document.getElementById('shopping-list');
     ul.innerHTML = '';
-    const visible = items.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
+
+    const entries = Object.entries(items);
+    const visible = entries.filter(([k, it]) =>
+      activeFilter === 'tutti' || it.category === activeFilter
+    );
+
     document.getElementById('empty-msg').style.display = visible.length === 0 ? 'block' : 'none';
-    visible.forEach(item => {
+
+    visible.forEach(([key, item]) => {
       const li = document.createElement('li');
-      if (checkedIds.has(item.id)) li.classList.add('checked');
+      if (item.checked) li.classList.add('checked');
       const cat = catColors[item.category] || { bg:'#f5f5f5', color:'#666' };
+
       li.innerHTML = `
         <div class="checkbox"></div>
         <div class="item-info">
           <div class="item-name">${escHtml(item.name)}</div>
           ${item.brand ? `<div class="item-brand">${escHtml(item.brand)}</div>` : ''}
         </div>
-        ${item.category ? `<span class="category-badge" style="background:${cat.bg};color:${cat.color}">${item.category}</span>` : ''}
-        <span class="item-price">${item.price > 0 ? '€ ' + item.price.toFixed(2).replace('.',',') : '—'}</span>
-        <button class="delete-btn" title="Rimuovi" onclick="removeItem(event,${item.id})">✕</button>
+        ${item.category ? `<span class="category-badge"
+          style="background:${cat.bg};color:${cat.color}">${item.category}</span>` : ''}
+        <span class="item-price">${item.price > 0 ? '€ ' + Number(item.price).toFixed(2).replace('.',',') : '—'}</span>
+        <button class="delete-btn" title="Rimuovi" onclick="removeItem(event,'${key}')">✕</button>
       `;
-      li.addEventListener('click', () => toggleCheck(item.id, li));
+      li.addEventListener('click', () => toggleCheck(key, item));
       ul.appendChild(li);
     });
+
     updateProgress();
     updateTotal();
     renderFilters();
   }
 
   function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function toggleCheck(id, li) {
-    if (checkedIds.has(id)) checkedIds.delete(id);
-    else checkedIds.add(id);
-    li.classList.toggle('checked');
-    updateProgress();
-    updateTotal();
+  // ── TOGGLE CHECK ──────────────────────────────────────
+  function toggleCheck(key, item) {
+    itemsRef.child(key).update({ checked: !item.checked });
   }
 
-  function removeItem(e, id) {
+  // ── RIMUOVI ───────────────────────────────────────────
+  function removeItem(e, key) {
     e.stopPropagation();
-    items = items.filter(it => it.id !== id);
-    checkedIds.delete(id);
-    render();
+    itemsRef.child(key).remove();
+    showToast('Articolo rimosso');
   }
 
+  // ── SVUOTA SPUNTATI ───────────────────────────────────
+  function clearChecked() {
+    const toRemove = Object.entries(items).filter(([k, it]) => it.checked);
+    if (toRemove.length === 0) { showToast('Nessun articolo spuntato'); return; }
+    const updates = {};
+    toRemove.forEach(([k]) => updates[k] = null);
+    itemsRef.update(updates);
+    showToast(`${toRemove.length} articolo/i rimosso/i`);
+  }
+
+  // ── AGGIUNGI ──────────────────────────────────────────
   function addItem() {
     const name  = document.getElementById('new-name').value.trim();
     const brand = document.getElementById('new-brand').value.trim();
     const price = parseFloat(document.getElementById('new-price').value) || 0;
     const cat   = document.getElementById('new-category').value;
+
     if (!name) {
       const inp = document.getElementById('new-name');
-      inp.focus();
-      inp.style.borderColor = '#e53935';
+      inp.focus(); inp.style.borderColor = '#e53935';
       setTimeout(() => inp.style.borderColor = '#ddd', 1500);
       return;
     }
-    items.push({ id: nextId++, name, brand, price, category: cat });
-    document.getElementById('new-name').value  = '';
-    document.getElementById('new-brand').value = '';
-    document.getElementById('new-price').value = '';
-    document.getElementById('new-category').value = '';
-    render();
-    const ul = document.getElementById('shopping-list');
-    if (ul.lastElementChild) ul.lastElementChild.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+    const btn = document.getElementById('add-btn');
+    btn.disabled = true;
+
+    itemsRef.push({ name, brand, price, category: cat, checked: false })
+      .then(() => {
+        document.getElementById('new-name').value    = '';
+        document.getElementById('new-brand').value   = '';
+        document.getElementById('new-price').value   = '';
+        document.getElementById('new-category').value = '';
+        showToast('✅ Articolo aggiunto!');
+      })
+      .catch(() => showToast('❌ Errore — riprova'))
+      .finally(() => btn.disabled = false);
   }
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && document.activeElement.closest('.add-form')) addItem();
   });
 
+  // ── FILTRI ────────────────────────────────────────────
   function renderFilters() {
-    const used = [...new Set(items.map(i => i.category).filter(Boolean))].sort();
+    const entries = Object.values(items);
+    const used = [...new Set(entries.map(i => i.category).filter(Boolean))].sort();
     const container = document.getElementById('filters');
     container.innerHTML = `<button class="filter-btn ${activeFilter==='tutti'?'active':''}"
-      onclick="filterBy('tutti',this)">🏷️ Tutti (${items.length})</button>`;
+      onclick="filterBy('tutti',this)">🏷️ Tutti (${entries.length})</button>`;
     used.forEach(cat => {
-      const count = items.filter(i => i.category === cat).length;
+      const count = entries.filter(i => i.category === cat).length;
       const btn = document.createElement('button');
       btn.className = 'filter-btn' + (activeFilter === cat ? ' active' : '');
       btn.textContent = `${cat} (${count})`;
@@ -364,22 +441,32 @@
     render();
   }
 
+  // ── PROGRESS ──────────────────────────────────────────
   function updateProgress() {
-    const visible = items.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
+    const all     = Object.values(items);
+    const visible = all.filter(it => activeFilter === 'tutti' || it.category === activeFilter);
     const total   = visible.length;
-    const checked = visible.filter(it => checkedIds.has(it.id)).length;
+    const checked = visible.filter(it => it.checked).length;
     const pct     = total > 0 ? Math.round((checked / total) * 100) : 0;
     document.getElementById('progress-text').textContent = `${checked} / ${total} articoli`;
     document.getElementById('progress-pct').textContent  = `${pct}%`;
     document.getElementById('progress-fill').style.width = pct + '%';
   }
 
+  // ── TOTALE ────────────────────────────────────────────
   function updateTotal() {
-    const total = items.reduce((s, it) => s + it.price, 0);
-    document.getElementById('total-price').textContent = '€ ' + total.toFixed(2).replace('.', ',');
+    const total = Object.values(items).reduce((s, it) => s + Number(it.price || 0), 0);
+    document.getElementById('total-price').textContent =
+      '€ ' + total.toFixed(2).replace('.', ',');
   }
 
-  render();
+  // ── TOAST ─────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
 </script>
 </body>
 </html>
