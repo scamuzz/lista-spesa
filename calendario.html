@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>📅 Calendario — Scamonzio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff8f0; min-height: 100vh; }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(160deg, #b5451b 0%, #e8621a 50%, #f4a261 100%);
+      color: white; padding: 52px 20px 36px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,255,255,0.10), transparent),
+                  radial-gradient(ellipse 50% 35% at 80% 70%, rgba(255,255,255,0.07), transparent);
+    }
+    .home-btn {
+      position: absolute; top: 14px; left: 14px; z-index: 10;
+      background: rgba(255,255,255,0.85); color: #e8621a; border: none; border-radius: 20px;
+      padding: 6px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .header h1 { font-size: 2rem; font-weight: 900; text-shadow: 0 3px 12px rgba(0,0,0,0.25); position: relative; }
+    .header .subtitle { font-size: 0.85rem; opacity: 0.90; margin-top: 8px; font-weight: 500; position: relative; }
+    .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.18); animation: floatUp linear infinite; }
+    .particle:nth-child(1) { width:8px; height:8px; left:10%; bottom:0; animation-duration:6s; animation-delay:0s; }
+    .particle:nth-child(2) { width:5px; height:5px; left:25%; bottom:0; animation-duration:4.5s; animation-delay:1s; }
+    .particle:nth-child(3) { width:10px; height:10px; left:42%; bottom:0; animation-duration:7s; animation-delay:2s; }
+    .particle:nth-child(4) { width:6px; height:6px; left:60%; bottom:0; animation-duration:5s; animation-delay:0.5s; }
+    .particle:nth-child(5) { width:12px; height:12px; left:75%; bottom:0; animation-duration:8s; animation-delay:1.5s; }
+    .particle:nth-child(6) { width:4px; height:4px; left:88%; bottom:0; animation-duration:4s; animation-delay:3s; }
+    @keyframes floatUp { 0% { transform:translateY(0) scale(1); opacity:0.8; } 100% { transform:translateY(-120px) scale(0.5); opacity:0; } }
+
+    /* SYNC */
+    .sync-status { display:flex; align-items:center; justify-content:center; gap:6px; font-size:0.72rem; margin-top:8px; opacity:0.9; position:relative; }
+    .sync-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse 1.5s infinite; flex-shrink:0; }
+    .sync-dot.connected { background:#a5d6a7; animation:none; }
+    .sync-dot.error { background:#ef9a9a; animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    /* WAVE */
+    .wave-divider { display:block; line-height:0; overflow:hidden; background:linear-gradient(160deg,#b5451b 0%,#e8621a 50%,#f4a261 100%); }
+    .wave-divider svg { display:block; width:100%; }
+
+    .container { max-width: 540px; margin: 0 auto; padding: 18px 14px 64px; }
+
+    /* FILTER MEMBERS */
+    .member-filters { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+    .mf-btn {
+      border:none; border-radius:20px; padding:5px 12px; font-size:0.75rem; font-weight:700; cursor:pointer;
+      transition:all 0.2s; opacity:0.55;
+    }
+    .mf-btn.active { opacity:1; color:white !important; }
+    .mf-btn[data-m="tutti"]     { background:#888; color:#fff; }
+    .mf-btn[data-m="andrea"]    { background:#1565c0; color:#fff; }
+    .mf-btn[data-m="matteo"]    { background:#2e7d32; color:#fff; }
+    .mf-btn[data-m="valentina"] { background:#6a1b9a; color:#fff; }
+    .mf-btn[data-m="mauro"]     { background:#e8621a; color:#fff; }
+    .mf-btn[data-m="famiglia"]  { background:#c62828; color:#fff; }
+
+    /* CALENDAR */
+    .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .cal-nav button {
+      background:white; border:2px solid #fbd5b5; border-radius:12px; padding:7px 14px;
+      font-size:0.85rem; font-weight:700; color:#e8621a; cursor:pointer;
+    }
+    .cal-nav button:hover { background:#fff3e8; }
+    .cal-month { font-size:1.05rem; font-weight:800; color:#bf4a1a; }
+
+    .cal-grid { background:white; border-radius:18px; overflow:hidden; box-shadow:0 3px 16px rgba(180,80,20,0.08); border:2px solid #fbd5b5; }
+    .cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); background:#fff3e8; }
+    .cal-days-header span { text-align:center; padding:8px 2px; font-size:0.68rem; font-weight:800; color:#bf4a1a; }
+    .cal-days { display:grid; grid-template-columns:repeat(7,1fr); }
+    .cal-day {
+      min-height:48px; padding:4px 2px; border:0.5px solid #fde8d8; cursor:pointer;
+      transition:background 0.15s; position:relative; display:flex; flex-direction:column; align-items:center;
+    }
+    .cal-day:hover { background:#fff3e8; }
+    .cal-day.today { background:#fff3e8; }
+    .cal-day.today .day-num { background:#e8621a; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+    .cal-day.other-month .day-num { color:#ccc; }
+    .day-num { font-size:0.75rem; font-weight:600; color:#444; line-height:1; margin-bottom:2px; }
+    .dots { display:flex; flex-wrap:wrap; gap:2px; justify-content:center; max-width:36px; }
+    .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+    /* EVENT PANEL */
+    .event-panel {
+      background:white; border-radius:18px; padding:18px; margin-top:14px;
+      box-shadow:0 3px 16px rgba(180,80,20,0.08); border:2px solid #fbd5b5; display:none;
+    }
+    .event-panel.open { display:block; }
+    .event-panel h3 { font-size:0.95rem; font-weight:800; color:#bf4a1a; margin-bottom:12px; }
+    .event-item {
+      display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid #fde8d8;
+    }
+    .event-item:last-child { border-bottom:none; }
+    .event-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .event-info { flex:1; min-width:0; }
+    .event-title { font-size:0.87rem; font-weight:700; color:#333; }
+    .event-meta { font-size:0.73rem; color:#999; margin-top:2px; }
+    .event-recurring { font-size:0.65rem; color:#e8621a; font-weight:700; }
+    .event-del { background:none; border:none; cursor:pointer; color:#ccc; font-size:0.9rem; flex-shrink:0; }
+    .event-del:hover { color:#e53935; }
+    .no-events { font-size:0.82rem; color:#bbb; text-align:center; padding:12px 0; }
+
+    /* ADD FORM */
+    .add-card { background:white; border-radius:18px; padding:18px; margin-top:14px; box-shadow:0 3px 16px rgba(180,80,20,0.08); border:2px solid #fbd5b5; }
+    .add-card h3 { font-size:0.82rem; font-weight:800; color:#bf4a1a; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .form-grid input, .form-grid select {
+      border:1.5px solid #fbd5b5; border-radius:10px; padding:9px 10px; font-size:0.82rem; outline:none;
+      transition:border-color 0.2s; color:#333; background:#fafafa; width:100%; min-width:0;
+    }
+    .form-grid input:focus, .form-grid select:focus { border-color:#e8621a; background:#fff; }
+    .form-grid .full { grid-column:1/-1; }
+    .add-btn {
+      grid-column:1/-1; background:linear-gradient(135deg,#e8621a,#f4a261); color:white; border:none;
+      border-radius:10px; padding:12px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+    }
+    .add-btn:hover { opacity:0.88; }
+    .add-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .check-row { display:flex; align-items:center; gap:8px; font-size:0.82rem; color:#666; grid-column:1/-1; }
+    .check-row input[type=checkbox] { width:16px; height:16px; accent-color:#e8621a; }
+
+    .page-footer { text-align:center; font-size:0.7rem; color:#d4a88a; padding:8px 0 24px; letter-spacing:0.3px; }
+
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:#323232; color:#fff; padding:10px 20px; border-radius:20px; font-size:0.83rem;
+      font-weight:500; transition:transform 0.3s ease; z-index:999; white-space:nowrap; max-width:calc(100vw - 32px);
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="particles">
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  </div>
+  <a class="home-btn" href="home.html">← Home</a>
+  <h1>📅 Calendario</h1>
+  <div class="subtitle">Appuntamenti di tutta la famiglia</div>
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Connessione in corso...</span>
+  </div>
+</div>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1380,12 1440,36 L1440,72 L0,72 Z" fill="#fff8f0"/>
+    <path d="M0,50 C220,18 440,66 660,46 C880,26 1100,62 1320,44 L1440,50 L1440,72 L0,72 Z" fill="#fff8f0" opacity="0.55"/>
+  </svg>
+</div>
+
+<div class="container">
+
+  <div class="member-filters" id="member-filters">
+    <button class="mf-btn active" data-m="tutti">❤️ Tutti</button>
+    <button class="mf-btn" data-m="andrea">🏊 Andrea</button>
+    <button class="mf-btn" data-m="matteo">🏀 Matteo</button>
+    <button class="mf-btn" data-m="valentina">🎓 Valentina</button>
+    <button class="mf-btn" data-m="mauro">📋 Mauro</button>
+    <button class="mf-btn" data-m="famiglia">🏠 Famiglia</button>
+  </div>
+
+  <div class="cal-nav">
+    <button onclick="changeMonth(-1)">‹ Prec</button>
+    <span class="cal-month" id="cal-month"></span>
+    <button onclick="changeMonth(1)">Succ ›</button>
+  </div>
+
+  <div class="cal-grid">
+    <div class="cal-days-header">
+      <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+    </div>
+    <div class="cal-days" id="cal-days"></div>
+  </div>
+
+  <div class="event-panel" id="event-panel">
+    <h3 id="panel-title">Eventi</h3>
+    <div id="panel-events"></div>
+  </div>
+
+  <div class="add-card">
+    <h3>➕ Aggiungi evento</h3>
+    <div class="form-grid">
+      <input type="text" id="ev-title" placeholder="Titolo evento *" class="full"/>
+      <input type="date" id="ev-date" />
+      <input type="time" id="ev-time" placeholder="Ora" />
+      <input type="number" id="ev-duration" placeholder="Durata (min)" min="0" />
+      <select id="ev-member">
+        <option value="famiglia">🏠 Famiglia</option>
+        <option value="andrea">🏊 Andrea</option>
+        <option value="matteo">🏀 Matteo</option>
+        <option value="valentina">🎓 Valentina</option>
+        <option value="mauro">📋 Mauro</option>
+      </select>
+      <select id="ev-type">
+        <option value="Altro">Altro</option>
+        <option value="Pallanuoto">🏊 Pallanuoto</option>
+        <option value="Basket">🏀 Basket</option>
+        <option value="Riunione scuola">🎓 Riunione scuola</option>
+        <option value="Medico">🏥 Medico</option>
+        <option value="Compleanno">🎂 Compleanno</option>
+        <option value="Vacanza">✈️ Vacanza</option>
+      </select>
+      <div class="check-row">
+        <input type="checkbox" id="ev-recurring" />
+        <label for="ev-recurring">Evento ricorrente (settimanale)</label>
+      </div>
+      <input type="text" id="ev-note" placeholder="Note (opz.)" class="full"/>
+      <button class="add-btn" onclick="addEvent()">➕ Aggiungi evento</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer">🏠 Scamonzio &nbsp;•&nbsp; Calendario</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
+    authDomain: "lista-spesa-b9eb1.firebaseapp.com",
+    databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lista-spesa-b9eb1",
+    storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
+    messagingSenderId: "468690890938",
+    appId: "1:468690890938:web:048be7f27779d8862d9283"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const evRef = db.ref('calendario');
+
+  const MEMBER_COLORS = {
+    andrea:    '#1565c0',
+    matteo:    '#2e7d32',
+    valentina: '#6a1b9a',
+    mauro:     '#e8621a',
+    famiglia:  '#c62828'
+  };
+
+  const MONTHS_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+  let events = {};
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth();
+  let selectedDate = null;
+  let activeFilter = 'tutti';
+
+  // Sync status
+  db.ref('.info/connected').on('value', snap => {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (snap.val()) { dot.className='sync-dot connected'; lbl.textContent='🟢 Sincronizzato'; }
+    else { dot.className='sync-dot error'; lbl.textContent='🔴 Offline'; }
+  });
+
+  evRef.on('value', snap => {
+    events = snap.val() || {};
+    renderCalendar();
+    if (selectedDate) showDayPanel(selectedDate);
+  });
+
+  // Member filter
+  document.getElementById('member-filters').addEventListener('click', e => {
+    const btn = e.target.closest('.mf-btn');
+    if (!btn) return;
+    document.querySelectorAll('.mf-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.m;
+    renderCalendar();
+    if (selectedDate) showDayPanel(selectedDate);
+  });
+
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+    closePanel();
+  }
+
+  function getFilteredEvents() {
+    if (activeFilter === 'tutti') return events;
+    const filtered = {};
+    Object.entries(events).forEach(([k, ev]) => {
+      if (ev.member === activeFilter) filtered[k] = ev;
+    });
+    return filtered;
+  }
+
+  function renderCalendar() {
+    document.getElementById('cal-month').textContent = MONTHS_IT[currentMonth] + ' ' + currentYear;
+    const grid = document.getElementById('cal-days');
+    grid.innerHTML = '';
+
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    let startDow = firstDay.getDay();
+    if (startDow === 0) startDow = 7;
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(currentYear, currentMonth, 0).getDate();
+    const today = new Date();
+    const fev = getFilteredEvents();
+
+    const totalCells = Math.ceil((startDow - 1 + daysInMonth) / 7) * 7;
+
+    for (let i = 0; i < totalCells; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      let dayNum, month, year, isOther = false;
+
+      if (i < startDow - 1) {
+        dayNum = daysInPrev - (startDow - 2 - i);
+        month = currentMonth - 1; year = currentYear;
+        if (month < 0) { month = 11; year--; }
+        isOther = true;
+      } else if (i >= startDow - 1 + daysInMonth) {
+        dayNum = i - (startDow - 1 + daysInMonth) + 1;
+        month = currentMonth + 1; year = currentYear;
+        if (month > 11) { month = 0; year++; }
+        isOther = true;
+      } else {
+        dayNum = i - startDow + 2;
+        month = currentMonth; year = currentYear;
+      }
+
+      if (isOther) cell.classList.add('other-month');
+
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+      const isToday = today.getDate()===dayNum && today.getMonth()===month && today.getFullYear()===year;
+      if (isToday) cell.classList.add('today');
+
+      const numEl = document.createElement('div');
+      numEl.className = 'day-num';
+      numEl.textContent = dayNum;
+      cell.appendChild(numEl);
+
+      // dots for events on this day
+      const dayEvents = Object.values(fev).filter(ev => {
+        if (ev.date === dateStr) return true;
+        if (ev.recurring && ev.date) {
+          const evDate = new Date(ev.date);
+          const cellDate = new Date(dateStr);
+          return evDate.getDay() === cellDate.getDay() && cellDate >= evDate;
+        }
+        return false;
+      });
+
+      if (dayEvents.length > 0) {
+        const dotsEl = document.createElement('div');
+        dotsEl.className = 'dots';
+        dayEvents.slice(0, 4).forEach(ev => {
+          const d = document.createElement('div');
+          d.className = 'dot';
+          d.style.background = MEMBER_COLORS[ev.member] || '#888';
+          dotsEl.appendChild(d);
+        });
+        cell.appendChild(dotsEl);
+      }
+
+      cell.addEventListener('click', () => {
+        selectedDate = dateStr;
+        showDayPanel(dateStr);
+      });
+      grid.appendChild(cell);
+    }
+  }
+
+  function showDayPanel(dateStr) {
+    const panel = document.getElementById('event-panel');
+    panel.classList.add('open');
+    const [y, m, d] = dateStr.split('-');
+    document.getElementById('panel-title').textContent =
+      `📅 ${parseInt(d)} ${MONTHS_IT[parseInt(m)-1]} ${y}`;
+
+    const fev = getFilteredEvents();
+    const dayEvents = Object.entries(fev).filter(([k, ev]) => {
+      if (ev.date === dateStr) return true;
+      if (ev.recurring && ev.date) {
+        const evDate = new Date(ev.date);
+        const cellDate = new Date(dateStr);
+        return evDate.getDay() === cellDate.getDay() && cellDate >= evDate;
+      }
+      return false;
+    });
+
+    const container = document.getElementById('panel-events');
+    if (dayEvents.length === 0) {
+      container.innerHTML = '<div class="no-events">Nessun evento per questo giorno</div>';
+    } else {
+      container.innerHTML = '';
+      dayEvents.forEach(([key, ev]) => {
+        const div = document.createElement('div');
+        div.className = 'event-item';
+        const color = MEMBER_COLORS[ev.member] || '#888';
+        div.innerHTML = `
+          <div class="event-dot" style="background:${color}"></div>
+          <div class="event-info">
+            <div class="event-title">${escHtml(ev.title)}</div>
+            <div class="event-meta">
+              ${ev.time ? ev.time : ''}
+              ${ev.duration ? ' · ' + ev.duration + ' min' : ''}
+              · ${capFirst(ev.member || 'famiglia')}
+              · ${ev.type || ''}
+              ${ev.note ? ' · ' + escHtml(ev.note) : ''}
+            </div>
+            ${ev.recurring ? '<div class="event-recurring">🔁 Settimanale</div>' : ''}
+          </div>
+          <button class="event-del" onclick="deleteEvent('${key}')">✕</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Set date field
+    document.getElementById('ev-date').value = dateStr;
+  }
+
+  function closePanel() {
+    document.getElementById('event-panel').classList.remove('open');
+    selectedDate = null;
+  }
+
+  function deleteEvent(key) {
+    evRef.child(key).remove();
+    showToast('Evento eliminato');
+  }
+
+  function addEvent() {
+    const title    = document.getElementById('ev-title').value.trim();
+    const date     = document.getElementById('ev-date').value;
+    const time     = document.getElementById('ev-time').value;
+    const duration = document.getElementById('ev-duration').value;
+    const member   = document.getElementById('ev-member').value;
+    const type     = document.getElementById('ev-type').value;
+    const note     = document.getElementById('ev-note').value.trim();
+    const recurring = document.getElementById('ev-recurring').checked;
+
+    if (!title || !date) { showToast('⚠️ Inserisci titolo e data'); return; }
+
+    evRef.push({ title, date, time, duration: duration ? parseInt(duration) : 0, member, type, note, recurring })
+      .then(() => {
+        document.getElementById('ev-title').value = '';
+        document.getElementById('ev-time').value = '';
+        document.getElementById('ev-duration').value = '';
+        document.getElementById('ev-note').value = '';
+        document.getElementById('ev-recurring').checked = false;
+        showToast('✅ Evento aggiunto!');
+      })
+      .catch(() => showToast('❌ Errore — riprova'));
+  }
+
+  function capFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  renderCalendar();
+  document.getElementById('ev-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
