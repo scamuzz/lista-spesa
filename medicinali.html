@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>💊 Medicinali — Scamonzio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff8f0; min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(160deg, #b5451b 0%, #e8621a 50%, #f4a261 100%);
+      color: white; padding: 52px 20px 36px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,255,255,0.10), transparent),
+                  radial-gradient(ellipse 50% 35% at 80% 70%, rgba(255,255,255,0.07), transparent);
+    }
+    .home-btn {
+      position: absolute; top: 14px; left: 14px; z-index: 10;
+      background: rgba(255,255,255,0.85); color: #e8621a; border: none; border-radius: 20px;
+      padding: 6px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .header h1 { font-size: 2rem; font-weight: 900; text-shadow: 0 3px 12px rgba(0,0,0,0.25); position: relative; }
+    .header .subtitle { font-size: 0.85rem; opacity: 0.90; margin-top: 8px; font-weight: 500; position: relative; }
+    .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.18); animation: floatUp linear infinite; }
+    .particle:nth-child(1) { width:8px; height:8px; left:10%; bottom:0; animation-duration:6s; animation-delay:0s; }
+    .particle:nth-child(2) { width:5px; height:5px; left:25%; bottom:0; animation-duration:4.5s; animation-delay:1s; }
+    .particle:nth-child(3) { width:10px; height:10px; left:42%; bottom:0; animation-duration:7s; animation-delay:2s; }
+    .particle:nth-child(4) { width:6px; height:6px; left:60%; bottom:0; animation-duration:5s; animation-delay:0.5s; }
+    .particle:nth-child(5) { width:12px; height:12px; left:75%; bottom:0; animation-duration:8s; animation-delay:1.5s; }
+    .particle:nth-child(6) { width:4px; height:4px; left:88%; bottom:0; animation-duration:4s; animation-delay:3s; }
+    @keyframes floatUp { 0%{transform:translateY(0) scale(1);opacity:0.8;} 100%{transform:translateY(-120px) scale(0.5);opacity:0;} }
+
+    .sync-status { display:flex; align-items:center; justify-content:center; gap:6px; font-size:0.72rem; margin-top:8px; opacity:0.9; position:relative; }
+    .sync-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse 1.5s infinite; flex-shrink:0; }
+    .sync-dot.connected { background:#a5d6a7; animation:none; }
+    .sync-dot.error { background:#ef9a9a; animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .wave-divider { display:block; line-height:0; overflow:hidden; background:linear-gradient(160deg,#b5451b 0%,#e8621a 50%,#f4a261 100%); }
+    .wave-divider svg { display:block; width:100%; }
+
+    .container { max-width: 540px; margin: 0 auto; padding: 18px 14px 64px; }
+
+    /* FILTER */
+    .filter-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+    .f-btn { border:none; border-radius:20px; padding:5px 12px; font-size:0.74rem; font-weight:700; cursor:pointer; background:#fde8d8; color:#bf4a1a; transition:all 0.2s; }
+    .f-btn.active, .f-btn:hover { background:#e8621a; color:#fff; }
+
+    /* MED LIST */
+    .med-list { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+    .med-item {
+      background:white; border-radius:14px; padding:12px 14px; box-shadow:0 2px 10px rgba(180,80,20,0.07);
+      border:2px solid #fde8d8;
+    }
+    .med-item.low-stock { border-color:#fbbf24; background:#fffbeb; }
+    .med-top { display:flex; align-items:flex-start; gap:8px; }
+    .med-icon { font-size:1.6rem; flex-shrink:0; }
+    .med-body { flex:1; min-width:0; }
+    .med-name { font-size:0.9rem; font-weight:700; color:#333; }
+    .med-active { font-size:0.75rem; color:#999; margin-top:1px; }
+    .med-badges { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+    .badge { font-size:0.65rem; font-weight:800; border-radius:8px; padding:2px 7px; }
+    .badge-andrea    { background:#dbeafe; color:#1565c0; }
+    .badge-matteo    { background:#dcfce7; color:#2e7d32; }
+    .badge-valentina { background:#f3e8ff; color:#6a1b9a; }
+    .badge-mauro     { background:#fff3e8; color:#e8621a; }
+    .badge-tutti     { background:#fde8e8; color:#c62828; }
+    .exp-ok     { background:#dcfce7; color:#16a34a; }
+    .exp-warn   { background:#fef9c3; color:#ca8a04; }
+    .exp-danger { background:#fee2e2; color:#dc2626; }
+    .low-badge { background:#fef3c7; color:#d97706; font-weight:900; }
+    .med-bottom { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .qty-controls { display:flex; align-items:center; gap:6px; }
+    .qty-btn { width:28px; height:28px; border:2px solid #fbd5b5; border-radius:50%; background:white; color:#e8621a; font-weight:900; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .qty-btn:hover { background:#fff3e8; }
+    .qty-val { font-size:0.95rem; font-weight:800; color:#333; min-width:32px; text-align:center; }
+    .qty-unit { font-size:0.75rem; color:#999; }
+    .med-del { background:none; border:none; cursor:pointer; color:#ccc; font-size:0.9rem; margin-left:auto; }
+    .med-del:hover { color:#e53935; }
+    .med-note { font-size:0.72rem; color:#aaa; margin-top:4px; font-style:italic; }
+
+    .empty-msg { text-align:center; padding:28px 0; color:#bbb; font-size:0.88rem; }
+    .empty-msg .big { font-size:2rem; display:block; margin-bottom:6px; }
+
+    /* ADD FORM */
+    .add-card { background:white; border-radius:18px; padding:18px; box-shadow:0 3px 16px rgba(180,80,20,0.08); border:2px solid #fbd5b5; }
+    .add-card h3 { font-size:0.82rem; font-weight:800; color:#bf4a1a; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .form-grid input, .form-grid select {
+      border:1.5px solid #fbd5b5; border-radius:10px; padding:9px 10px; font-size:0.82rem; outline:none;
+      transition:border-color 0.2s; color:#333; background:#fafafa; width:100%; min-width:0;
+    }
+    .form-grid input:focus, .form-grid select:focus { border-color:#e8621a; background:#fff; }
+    .form-grid .full { grid-column:1/-1; }
+    .add-btn {
+      grid-column:1/-1; background:linear-gradient(135deg,#e8621a,#f4a261); color:white; border:none;
+      border-radius:10px; padding:12px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+    }
+    .add-btn:hover { opacity:0.88; }
+
+    .page-footer { text-align:center; font-size:0.7rem; color:#d4a88a; padding:8px 0 24px; letter-spacing:0.3px; }
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:#323232; color:#fff; padding:10px 20px; border-radius:20px; font-size:0.83rem;
+      font-weight:500; transition:transform 0.3s ease; z-index:999; white-space:nowrap; max-width:calc(100vw - 32px);
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="particles">
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  </div>
+  <a class="home-btn" href="home.html">← Home</a>
+  <h1>💊 Medicinali</h1>
+  <div class="subtitle">Scorte in casa e scadenze</div>
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Connessione in corso...</span>
+  </div>
+</div>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1380,12 1440,36 L1440,72 L0,72 Z" fill="#fff8f0"/>
+    <path d="M0,50 C220,18 440,66 660,46 C880,26 1100,62 1320,44 L1440,50 L1440,72 L0,72 Z" fill="#fff8f0" opacity="0.55"/>
+  </svg>
+</div>
+
+<div class="container">
+  <div class="filter-row">
+    <button class="f-btn active" data-f="tutti"     onclick="setFilter('tutti',this)">💊 Tutti</button>
+    <button class="f-btn" data-f="andrea"           onclick="setFilter('andrea',this)">🏊 Andrea</button>
+    <button class="f-btn" data-f="matteo"           onclick="setFilter('matteo',this)">🏀 Matteo</button>
+    <button class="f-btn" data-f="valentina"        onclick="setFilter('valentina',this)">🎓 Valentina</button>
+    <button class="f-btn" data-f="mauro"            onclick="setFilter('mauro',this)">📋 Mauro</button>
+    <button class="f-btn" data-f="famiglia"         onclick="setFilter('famiglia',this)">❤️ Famiglia</button>
+  </div>
+
+  <div class="med-list" id="med-list"></div>
+  <div class="empty-msg" id="empty-msg" style="display:none;"><span class="big">💊</span>Nessun medicinale trovato</div>
+
+  <div class="add-card">
+    <h3>➕ Aggiungi medicinale</h3>
+    <div class="form-grid">
+      <input type="text" id="m-name" placeholder="Nome medicinale *" class="full"/>
+      <input type="text" id="m-active" placeholder="Principio attivo"/>
+      <input type="number" id="m-qty" placeholder="Quantità" min="0" />
+      <select id="m-unit">
+        <option value="compresse">Compresse</option>
+        <option value="ml">ml</option>
+        <option value="bustine">Bustine</option>
+        <option value="capsule">Capsule</option>
+        <option value="fiale">Fiale</option>
+        <option value="altro">Altro</option>
+      </select>
+      <input type="date" id="m-exp" placeholder="Scadenza"/>
+      <select id="m-member">
+        <option value="famiglia">❤️ Famiglia</option>
+        <option value="andrea">🏊 Andrea</option>
+        <option value="matteo">🏀 Matteo</option>
+        <option value="valentina">🎓 Valentina</option>
+        <option value="mauro">📋 Mauro</option>
+      </select>
+      <input type="text" id="m-note" placeholder="Note (opz.)" class="full"/>
+      <button class="add-btn" onclick="addMed()">➕ Aggiungi medicinale</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-footer">🏠 Scamonzio &nbsp;•&nbsp; Medicinali</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
+    authDomain: "lista-spesa-b9eb1.firebaseapp.com",
+    databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lista-spesa-b9eb1",
+    storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
+    messagingSenderId: "468690890938",
+    appId: "1:468690890938:web:048be7f27779d8862d9283"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const medRef = db.ref('medicinali');
+
+  let meds = {};
+  let activeFilter = 'tutti';
+
+  db.ref('.info/connected').on('value', snap => {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (snap.val()) { dot.className='sync-dot connected'; lbl.textContent='🟢 Sincronizzato'; }
+    else { dot.className='sync-dot error'; lbl.textContent='🔴 Offline'; }
+  });
+
+  medRef.on('value', snap => {
+    meds = snap.val() || {};
+    render();
+  });
+
+  function setFilter(f, btn) {
+    activeFilter = f;
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function getExpClass(exp) {
+    if (!exp) return null;
+    const now = new Date();
+    const expDate = new Date(exp);
+    const diff = (expDate - now) / (1000 * 60 * 60 * 24 * 30);
+    if (diff < 1)  return 'exp-danger';
+    if (diff < 6)  return 'exp-warn';
+    return 'exp-ok';
+  }
+  function getExpLabel(exp) {
+    if (!exp) return null;
+    const now = new Date();
+    const expDate = new Date(exp);
+    const [y,m,d] = exp.split('-');
+    if (expDate < now) return `❌ Scaduto ${d}/${m}/${y}`;
+    const diff = Math.round((expDate - now) / (1000 * 60 * 60 * 24 * 30));
+    if (diff < 1) return `⚠️ Scade presto (${d}/${m}/${y})`;
+    return `📅 Scade ${d}/${m}/${y}`;
+  }
+  function memLabel(m) {
+    return { andrea:'🏊 Andrea', matteo:'🏀 Matteo', valentina:'🎓 Valentina', mauro:'📋 Mauro', famiglia:'❤️ Famiglia' }[m] || '❤️ Famiglia';
+  }
+
+  function render() {
+    const list = document.getElementById('med-list');
+    list.innerHTML = '';
+    const visible = Object.entries(meds).filter(([k,m]) => activeFilter === 'tutti' || m.member === activeFilter);
+    document.getElementById('empty-msg').style.display = visible.length === 0 ? 'block' : 'none';
+
+    visible.forEach(([key, m]) => {
+      const lowStock = (m.qty !== undefined && m.qty !== null && m.qty <= 2);
+      const div = document.createElement('div');
+      div.className = 'med-item' + (lowStock ? ' low-stock' : '');
+      const expClass = getExpClass(m.exp);
+      const expLabel = getExpLabel(m.exp);
+      div.innerHTML = `
+        <div class="med-top">
+          <div class="med-icon">💊</div>
+          <div class="med-body">
+            <div class="med-name">${escHtml(m.name)}</div>
+            ${m.active ? `<div class="med-active">${escHtml(m.active)}</div>` : ''}
+            <div class="med-badges">
+              <span class="badge badge-${m.member || 'famiglia'}">${memLabel(m.member)}</span>
+              ${expClass ? `<span class="badge ${expClass}">${expLabel}</span>` : ''}
+              ${lowStock ? `<span class="badge low-badge">⚠️ Scorta bassa!</span>` : ''}
+            </div>
+          </div>
+          <button class="med-del" onclick="deleteMed('${key}')">✕</button>
+        </div>
+        <div class="med-bottom">
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty('${key}', ${m.qty || 0}, -1)">−</button>
+            <span class="qty-val">${m.qty !== undefined ? m.qty : '—'}</span>
+            <button class="qty-btn" onclick="changeQty('${key}', ${m.qty || 0}, 1)">+</button>
+            <span class="qty-unit">${m.unit || ''}</span>
+          </div>
+        </div>
+        ${m.note ? `<div class="med-note">${escHtml(m.note)}</div>` : ''}
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function changeQty(key, current, delta) {
+    const newQty = Math.max(0, (parseInt(current) || 0) + delta);
+    medRef.child(key).update({ qty: newQty });
+    if (newQty <= 2) showToast('⚠️ Scorta bassa: solo ' + newQty + ' rimasti!');
+  }
+  function deleteMed(key) {
+    medRef.child(key).remove();
+    showToast('Medicinale rimosso');
+  }
+  function addMed() {
+    const name   = document.getElementById('m-name').value.trim();
+    const active = document.getElementById('m-active').value.trim();
+    const qty    = parseInt(document.getElementById('m-qty').value) || 0;
+    const unit   = document.getElementById('m-unit').value;
+    const exp    = document.getElementById('m-exp').value;
+    const member = document.getElementById('m-member').value;
+    const note   = document.getElementById('m-note').value.trim();
+    if (!name) { showToast('⚠️ Inserisci il nome'); return; }
+    medRef.push({ name, active, qty, unit, exp, member, note })
+      .then(() => {
+        document.getElementById('m-name').value = '';
+        document.getElementById('m-active').value = '';
+        document.getElementById('m-qty').value = '';
+        document.getElementById('m-exp').value = '';
+        document.getElementById('m-note').value = '';
+        showToast('✅ Medicinale aggiunto!');
+        if (qty <= 2 && qty > 0) showToast('⚠️ Scorta bassa!');
+      })
+      .catch(() => showToast('❌ Errore'));
+  }
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>

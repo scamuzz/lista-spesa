@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>📌 Bacheca — Scamonzio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; overflow-x: hidden; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff8f0; min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(160deg, #b5451b 0%, #e8621a 50%, #f4a261 100%);
+      color: white; padding: 52px 20px 36px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 20% 30%, rgba(255,255,255,0.10), transparent),
+                  radial-gradient(ellipse 50% 35% at 80% 70%, rgba(255,255,255,0.07), transparent);
+    }
+    .home-btn {
+      position: absolute; top: 14px; left: 14px; z-index: 10;
+      background: rgba(255,255,255,0.85); color: #e8621a; border: none; border-radius: 20px;
+      padding: 6px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .header h1 { font-size: 2rem; font-weight: 900; text-shadow: 0 3px 12px rgba(0,0,0,0.25); position: relative; }
+    .header .subtitle { font-size: 0.85rem; opacity: 0.90; margin-top: 8px; font-weight: 500; position: relative; }
+    .particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .particle { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.18); animation: floatUp linear infinite; }
+    .particle:nth-child(1) { width:8px; height:8px; left:10%; bottom:0; animation-duration:6s; animation-delay:0s; }
+    .particle:nth-child(2) { width:5px; height:5px; left:25%; bottom:0; animation-duration:4.5s; animation-delay:1s; }
+    .particle:nth-child(3) { width:10px; height:10px; left:42%; bottom:0; animation-duration:7s; animation-delay:2s; }
+    .particle:nth-child(4) { width:6px; height:6px; left:60%; bottom:0; animation-duration:5s; animation-delay:0.5s; }
+    .particle:nth-child(5) { width:12px; height:12px; left:75%; bottom:0; animation-duration:8s; animation-delay:1.5s; }
+    .particle:nth-child(6) { width:4px; height:4px; left:88%; bottom:0; animation-duration:4s; animation-delay:3s; }
+    @keyframes floatUp { 0%{transform:translateY(0) scale(1);opacity:0.8;} 100%{transform:translateY(-120px) scale(0.5);opacity:0;} }
+
+    .sync-status { display:flex; align-items:center; justify-content:center; gap:6px; font-size:0.72rem; margin-top:8px; opacity:0.9; position:relative; }
+    .sync-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse 1.5s infinite; flex-shrink:0; }
+    .sync-dot.connected { background:#a5d6a7; animation:none; }
+    .sync-dot.error { background:#ef9a9a; animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .wave-divider { display:block; line-height:0; overflow:hidden; background:linear-gradient(160deg,#b5451b 0%,#e8621a 50%,#f4a261 100%); }
+    .wave-divider svg { display:block; width:100%; }
+
+    .container { max-width: 540px; margin: 0 auto; padding: 18px 14px 64px; }
+
+    /* FILTER */
+    .filter-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+    .f-btn { border:none; border-radius:20px; padding:5px 12px; font-size:0.74rem; font-weight:700; cursor:pointer; background:#fde8d8; color:#bf4a1a; transition:all 0.2s; }
+    .f-btn.active, .f-btn:hover { background:#e8621a; color:#fff; }
+
+    /* POST-IT LIST */
+    .post-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+    .post-item {
+      border-radius:14px; padding:14px; box-shadow:0 3px 14px rgba(0,0,0,0.08);
+      border-left:5px solid #e8621a; position:relative;
+    }
+    .post-item[data-author="andrea"]    { background:#eff6ff; border-left-color:#1565c0; }
+    .post-item[data-author="matteo"]    { background:#f0fdf4; border-left-color:#2e7d32; }
+    .post-item[data-author="valentina"] { background:#faf5ff; border-left-color:#6a1b9a; }
+    .post-item[data-author="mauro"]     { background:#fff7ed; border-left-color:#e8621a; }
+    .post-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .post-author { font-size:0.8rem; font-weight:800; }
+    .post-author[data-a="andrea"]    { color:#1565c0; }
+    .post-author[data-a="matteo"]    { color:#2e7d32; }
+    .post-author[data-a="valentina"] { color:#6a1b9a; }
+    .post-author[data-a="mauro"]     { color:#e8621a; }
+    .post-time { font-size:0.68rem; color:#bbb; margin-left:auto; }
+    .post-del { background:none; border:none; cursor:pointer; color:#ccc; font-size:0.85rem; }
+    .post-del:hover { color:#e53935; }
+    .post-text { font-size:0.88rem; color:#333; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
+    .post-reactions { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .reaction-btn {
+      border:1.5px solid #e8e8e8; border-radius:20px; padding:3px 10px; font-size:0.82rem; cursor:pointer;
+      background:white; transition:all 0.15s; display:flex; align-items:center; gap:3px;
+    }
+    .reaction-btn:hover { background:#fff3e8; border-color:#e8621a; }
+    .reaction-btn.reacted { background:#fff3e8; border-color:#e8621a; font-weight:700; }
+    .reaction-count { font-size:0.72rem; color:#888; }
+
+    .empty-msg { text-align:center; padding:28px 0; color:#bbb; font-size:0.88rem; }
+    .empty-msg .big { font-size:2rem; display:block; margin-bottom:6px; }
+
+    /* ADD FORM */
+    .add-card { background:white; border-radius:18px; padding:18px; box-shadow:0 3px 16px rgba(180,80,20,0.08); border:2px solid #fbd5b5; }
+    .add-card h3 { font-size:0.82rem; font-weight:800; color:#bf4a1a; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-group { margin-bottom:10px; }
+    .form-group select, .form-group textarea {
+      width:100%; border:1.5px solid #fbd5b5; border-radius:10px; padding:9px 10px; font-size:0.85rem; outline:none;
+      font-family:inherit; transition:border-color 0.2s; color:#333; background:#fafafa; resize:vertical;
+    }
+    .form-group select:focus, .form-group textarea:focus { border-color:#e8621a; background:#fff; }
+    .add-btn {
+      width:100%; background:linear-gradient(135deg,#e8621a,#f4a261); color:white; border:none;
+      border-radius:10px; padding:12px; font-size:0.9rem; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+    }
+    .add-btn:hover { opacity:0.88; }
+    .add-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+    .page-footer { text-align:center; font-size:0.7rem; color:#d4a88a; padding:8px 0 24px; letter-spacing:0.3px; }
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:#323232; color:#fff; padding:10px 20px; border-radius:20px; font-size:0.83rem;
+      font-weight:500; transition:transform 0.3s ease; z-index:999; white-space:nowrap; max-width:calc(100vw - 32px);
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="particles">
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+    <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  </div>
+  <a class="home-btn" href="home.html">← Home</a>
+  <h1>📌 Bacheca</h1>
+  <div class="subtitle">Note e avvisi tra familiari</div>
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Connessione in corso...</span>
+  </div>
+</div>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1380,12 1440,36 L1440,72 L0,72 Z" fill="#fff8f0"/>
+    <path d="M0,50 C220,18 440,66 660,46 C880,26 1100,62 1320,44 L1440,50 L1440,72 L0,72 Z" fill="#fff8f0" opacity="0.55"/>
+  </svg>
+</div>
+
+<div class="container">
+  <div class="filter-row">
+    <button class="f-btn active" data-f="tutti"     onclick="setFilter('tutti',this)">📌 Tutti</button>
+    <button class="f-btn" data-f="andrea"           onclick="setFilter('andrea',this)">🏊 Andrea</button>
+    <button class="f-btn" data-f="matteo"           onclick="setFilter('matteo',this)">🏀 Matteo</button>
+    <button class="f-btn" data-f="valentina"        onclick="setFilter('valentina',this)">🎓 Valentina</button>
+    <button class="f-btn" data-f="mauro"            onclick="setFilter('mauro',this)">📋 Mauro</button>
+  </div>
+
+  <div class="post-list" id="post-list"></div>
+  <div class="empty-msg" id="empty-msg" style="display:none;"><span class="big">📌</span>Nessun post qui!</div>
+
+  <div class="add-card">
+    <h3>✍️ Nuovo messaggio</h3>
+    <div class="form-group">
+      <select id="p-author">
+        <option value="andrea">🏊 Andrea</option>
+        <option value="matteo">🏀 Matteo</option>
+        <option value="valentina">🎓 Valentina</option>
+        <option value="mauro">📋 Mauro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <textarea id="p-text" placeholder="Scrivi un messaggio..." rows="3"></textarea>
+    </div>
+    <button class="add-btn" id="post-btn" onclick="addPost()">📌 Pubblica</button>
+  </div>
+</div>
+
+<div class="page-footer">🏠 Scamonzio &nbsp;•&nbsp; Bacheca</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
+    authDomain: "lista-spesa-b9eb1.firebaseapp.com",
+    databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lista-spesa-b9eb1",
+    storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
+    messagingSenderId: "468690890938",
+    appId: "1:468690890938:web:048be7f27779d8862d9283"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const boardRef = db.ref('bacheca');
+
+  const REACTIONS = ['👍','❤️','😂','😮'];
+  const AUTHOR_NAMES = { andrea:'Andrea', matteo:'Matteo', valentina:'Valentina', mauro:'Mauro' };
+  const AUTHOR_ICONS = { andrea:'🏊', matteo:'🏀', valentina:'🎓', mauro:'📋' };
+
+  let posts = {};
+  let activeFilter = 'tutti';
+
+  db.ref('.info/connected').on('value', snap => {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (snap.val()) { dot.className='sync-dot connected'; lbl.textContent='🟢 Sincronizzato'; }
+    else { dot.className='sync-dot error'; lbl.textContent='🔴 Offline'; }
+  });
+
+  boardRef.on('value', snap => {
+    posts = snap.val() || {};
+    render();
+  });
+
+  function setFilter(f, btn) {
+    activeFilter = f;
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('post-list');
+    list.innerHTML = '';
+    const visible = Object.entries(posts)
+      .filter(([k,p]) => activeFilter === 'tutti' || p.author === activeFilter)
+      .sort(([,a],[,b]) => (b.ts || 0) - (a.ts || 0));
+    document.getElementById('empty-msg').style.display = visible.length === 0 ? 'block' : 'none';
+
+    visible.forEach(([key, p]) => {
+      const div = document.createElement('div');
+      div.className = 'post-item';
+      div.dataset.author = p.author || 'andrea';
+      const time = p.ts ? formatTime(p.ts) : '';
+      const reactions = p.reactions || {};
+      const reactHtml = REACTIONS.map(em => {
+        const count = reactions[em] || 0;
+        return `<button class="reaction-btn${count>0?' reacted':''}" onclick="react('${key}','${em}')">
+          ${em} <span class="reaction-count">${count > 0 ? count : ''}</span>
+        </button>`;
+      }).join('');
+      div.innerHTML = `
+        <div class="post-header">
+          <span class="post-author" data-a="${p.author || 'andrea'}">${AUTHOR_ICONS[p.author] || '👤'} ${AUTHOR_NAMES[p.author] || 'Anonimo'}</span>
+          <span class="post-time">${time}</span>
+          <button class="post-del" onclick="deletePost('${key}')">✕</button>
+        </div>
+        <div class="post-text">${escHtml(p.text || '')}</div>
+        <div class="post-reactions">${reactHtml}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function formatTime(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 60000) return 'ora';
+    if (diff < 3600000) return Math.floor(diff/60000) + ' min fa';
+    if (diff < 86400000) return Math.floor(diff/3600000) + ' h fa';
+    return d.toLocaleDateString('it-IT', { day:'numeric', month:'short' });
+  }
+
+  function react(key, emoji) {
+    const current = (posts[key] && posts[key].reactions && posts[key].reactions[emoji]) || 0;
+    boardRef.child(`${key}/reactions/${emoji}`).set(current + 1);
+  }
+  function deletePost(key) {
+    boardRef.child(key).remove();
+    showToast('Post rimosso');
+  }
+  function addPost() {
+    const author = document.getElementById('p-author').value;
+    const text = document.getElementById('p-text').value.trim();
+    if (!text) { showToast('⚠️ Scrivi qualcosa!'); return; }
+    const btn = document.getElementById('post-btn');
+    btn.disabled = true;
+    boardRef.push({ author, text, ts: Date.now(), reactions: {} })
+      .then(() => {
+        document.getElementById('p-text').value = '';
+        showToast('✅ Pubblicato!');
+      })
+      .catch(() => showToast('❌ Errore'))
+      .finally(() => btn.disabled = false);
+  }
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
