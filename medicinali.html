@@ -283,9 +283,10 @@
   }
 
   function changeQty(key, current, delta) {
-    const newQty = Math.max(0, (parseInt(current) || 0) + delta);
+    const prev = parseInt(current) || 0;
+    const newQty = Math.max(0, prev + delta);
     medRef.child(key).update({ qty: newQty });
-    if (newQty <= 2) showToast('⚠️ Scorta bassa: solo ' + newQty + ' rimasti!');
+    if (delta < 0 && newQty <= 2) showToast('⚠️ Scorta bassa: solo ' + newQty + ' rimasti!');
   }
   function deleteMed(key) {
     medRef.child(key).remove();

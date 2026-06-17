@@ -191,17 +191,15 @@
 
   const CAT_ICONS = { Medico:'🏥', Scuola:'🎓', Parente:'👨‍👩‍👧', Amico:'👤', Servizio:'🔧', Altro:'📌' };
 
-  let contacts = {};
-  let activeCategory = 'tutti';
-
-  // Seed example contacts on first load
-  let seeded = false;
   const EXAMPLE_CONTACTS = [
     { name:'Medico di Base', category:'Medico', phone:'', note:'Da compilare' },
     { name:'Pediatra', category:'Medico', phone:'', note:'Da compilare' },
     { name:'Scuola di Andrea', category:'Scuola', phone:'', note:'Pallanuoto' },
     { name:'Palestra Basket Matteo', category:'Servizio', phone:'', note:'Basket' }
   ];
+
+  let contacts = {};
+  let activeCategory = 'tutti';
 
   db.ref('.info/connected').on('value', snap => {
     const dot = document.getElementById('sync-dot');
@@ -210,13 +208,17 @@
     else { dot.className='sync-dot error'; lbl.textContent='🔴 Offline'; }
   });
 
+  // Seed example contacts once globally using a database flag
   rubRef.on('value', snap => {
     contacts = snap.val() || {};
-    if (!seeded && Object.keys(contacts).length === 0) {
-      seeded = true;
-      EXAMPLE_CONTACTS.forEach(c => rubRef.push(c));
-    }
     render();
+  });
+
+  db.ref('rubrica_seeded').once('value', snap => {
+    if (!snap.val()) {
+      EXAMPLE_CONTACTS.forEach(c => rubRef.push(c));
+      db.ref('rubrica_seeded').set(true);
+    }
   });
 
   function setCat(c, btn) {

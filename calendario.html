@@ -333,7 +333,7 @@
         if (month > 11) { month = 0; year++; }
         isOther = true;
       } else {
-        dayNum = i - (startDow - 2);
+        dayNum = i - startDow + 2;
         month = currentMonth; year = currentYear;
       }
 

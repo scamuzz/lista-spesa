@@ -122,6 +122,9 @@
     .quiz-result .comment { font-size:0.9rem; color:#888; margin-bottom:16px; line-height:1.6; }
     .quiz-restart { background:linear-gradient(135deg,#e8621a,#f4a261); color:white; border:none; border-radius:12px; padding:12px 28px; font-size:0.9rem; font-weight:700; cursor:pointer; }
 
+    .sudoku-cell.box-right  { border-right:  2.5px solid #bf4a1a; }
+    .sudoku-cell.box-bottom { border-bottom: 2.5px solid #bf4a1a; }
+
     .page-footer { text-align:center; font-size:0.7rem; color:#d4a88a; padding:8px 0 24px; letter-spacing:0.3px; }
     .toast {
       position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px);
@@ -320,8 +323,8 @@ function renderGrid() {
     for (let c = 0; c < 9; c++) {
       const cell = document.createElement('div');
       cell.className = 'sudoku-cell';
-      if (r === 2 || r === 5) cell.style.borderBottom = '2.5px solid #bf4a1a';
-      if (c === 2 || c === 5) cell.style.borderRight  = '2.5px solid #bf4a1a';
+      if (r === 2 || r === 5) cell.classList.add('box-bottom');
+      if (c === 2 || c === 5) cell.classList.add('box-right');
       const given = sudokuPuzzle[r][c] !== 0;
       if (given) { cell.classList.add('given'); cell.textContent = sudokuPuzzle[r][c]; }
       else if (sudokuPlayer[r][c] !== 0) {
@@ -452,7 +455,7 @@ const ALL_QUESTIONS = [
   { q:'In quale anno si è svolta la prima Olimpiade moderna?', opts:['1896','1900','1880','1912'], a:0 },
   { q:'Quanti giocatori ci sono in una squadra di pallanuoto in acqua?', opts:['6','7','8','5'], a:1 },
   { q:'Qual è la capitale della Sardegna?', opts:['Cagliari','Sassari','Nuoro','Oristano'], a:0 },
-  { q:'Quanti punti vale una schiacciata da tre in basket?', opts:['2','3','1','4'], a:1 },
+  { q:'Quanti punti vale un tiro da tre punti nel basket?', opts:['2','3','1','4'], a:1 },
   { q:'Quale fiume attraversa Torino?', opts:['Po','Tevere','Arno','Adige'], a:0 },
   { q:'In pallanuoto, quanti set vengono giocati in una partita ufficiale?', opts:['4 tempi','3 set','2 tempi','4 quarti'], a:3 },
   { q:'In quale regione italiana si trova il lago di Garda?', opts:['Tra Veneto, Lombardia e Trentino','Solo in Lombardia','Solo in Veneto','In Piemonte'], a:0 },

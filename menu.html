@@ -314,7 +314,7 @@
       });
     });
     if (!ingredients.length) { showToast('⚠️ Nessun ingrediente da esportare'); return; }
-    const pushes = ingredients.map(name => itemsRef.push({ name, brand:'', price:0, category:'🍝 Pasta & Cereali', checked:false }));
+    const pushes = ingredients.map(name => itemsRef.push({ name, brand:'', price:0, category:'❓ Altro', checked:false }));
     Promise.all(pushes)
       .then(() => showToast(`✅ ${ingredients.length} ingredienti aggiunti alla lista spesa!`))
       .catch(() => showToast('❌ Errore'));
