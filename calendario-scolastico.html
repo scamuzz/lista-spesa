@@ -1,247 +1,43 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎓 Calendario scolastico — Scamonzio</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #fff8f0; min-height: 100vh; color: #333; }
-    .header { background: linear-gradient(160deg, #b5451b 0%, #e8621a 50%, #f4a261 100%); color: white; padding: 48px 20px 30px; text-align: center; position: relative; }
-    .home-btn { position:absolute; top:14px; left:14px; background:rgba(255,255,255,.88); color:#e8621a; border-radius:20px; padding:7px 14px; font-size:.82rem; font-weight:700; text-decoration:none; }
-    .header h1 { font-size:1.8rem; font-weight:900; }
-    .header p { font-size:.88rem; margin-top:7px; opacity:.92; }
-    .container { max-width:1000px; margin:0 auto; padding:20px 14px 56px; }
-    .status { text-align:center; font-size:.75rem; color:#777; margin:0 0 15px; }
-    .members { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:16px; }
-    .member-btn { border:2px solid transparent; border-radius:20px; padding:8px 18px; font-size:.9rem; font-weight:800; cursor:pointer; background:#fff; color:#555; box-shadow:0 2px 9px #b4501415; }
-    .member-btn.active { color:white; }
-    .member-btn[data-member="valentina"].active { background:#6a1b9a; }
-    .member-btn[data-member="andrea"].active { background:#1565c0; }
-    .member-btn[data-member="matteo"].active { background:#2e7d32; }
-    .hint { background:white; border:1px solid #fbd5b5; border-radius:12px; padding:11px 14px; color:#777; font-size:.78rem; line-height:1.5; margin-bottom:12px; }
-    .table-wrap { background:white; border-radius:15px; overflow-x:auto; box-shadow:0 3px 16px #b4501414; border:2px solid #fbd5b5; }
-    table { border-collapse:collapse; width:100%; min-width:690px; table-layout:fixed; }
-    th { background:#fff0e3; color:#bf4a1a; padding:12px 7px; font-size:.82rem; }
-    th:first-child { width:86px; }
-    td { border:1px solid #fde8d8; height:57px; padding:4px; }
-    td.time { background:#fffaf6; text-align:center; color:#bf4a1a; font-weight:800; font-size:.82rem; }
-    td input, td textarea { border:1px solid transparent; border-radius:7px; width:100%; height:100%; min-height:42px; padding:6px; text-align:center; font:600 .82rem 'Segoe UI',sans-serif; color:#444; background:transparent; resize:none; }
-    td textarea { line-height:1.2; }
-    td input:hover, td input:focus, td textarea:hover, td textarea:focus { background:#fff8f2; border-color:#f4a261; outline:none; }
-    td input::placeholder, td textarea::placeholder { color:#d5c7be; font-weight:400; }
-    .row-actions { display:flex; justify-content:center; margin:12px 0; }
-    .add-row { border:1px solid #f4a261; border-radius:9px; background:white; color:#bf4a1a; padding:9px 14px; font-weight:700; cursor:pointer; }
-    .save-note { text-align:center; color:#888; font-size:.74rem; min-height:20px; margin-top:8px; }
-    .page-footer { text-align:center; font-size:.7rem; color:#d4a88a; padding:10px 0 24px; }
-    @media (max-width:560px) { .header h1 { font-size:1.45rem; } .container { padding:15px 9px 45px; } .member-btn { padding:7px 14px; } }
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',sans-serif;background:#fff8f0;min-height:100vh;color:#333}.header{background:linear-gradient(160deg,#b5451b,#e8621a 50%,#f4a261);color:#fff;padding:48px 20px 30px;text-align:center;position:relative}.home-btn{position:absolute;top:14px;left:14px;background:#ffffffe0;color:#e8621a;border-radius:20px;padding:7px 14px;font-size:.82rem;font-weight:700;text-decoration:none}.header h1{font-size:1.8rem;font-weight:900}.header p{font-size:.88rem;margin-top:7px;opacity:.92}.container{max-width:1000px;margin:auto;padding:20px 14px 56px}.status{text-align:center;font-size:.75rem;color:#777;margin-bottom:15px}.members{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px}.member-btn{border:2px solid transparent;border-radius:20px;padding:8px 18px;font-size:.9rem;font-weight:800;cursor:pointer;background:#fff;color:#555;box-shadow:0 2px 9px #b4501415}.member-btn.active{color:#fff}.member-btn[data-member=valentina].active{background:#6a1b9a}.member-btn[data-member=andrea].active{background:#1565c0}.member-btn[data-member=matteo].active{background:#2e7d32}.hint{background:#fff;border:1px solid #fbd5b5;border-radius:12px;padding:11px 14px;color:#777;font-size:.78rem;line-height:1.5;margin-bottom:12px}.table-wrap{background:#fff;border-radius:15px;overflow-x:auto;box-shadow:0 3px 16px #b4501414;border:2px solid #fbd5b5}table{border-collapse:collapse;width:100%;min-width:690px;table-layout:fixed}th{background:#fff0e3;color:#bf4a1a;padding:12px 7px;font-size:.82rem}th:first-child{width:125px}td{border:1px solid #fde8d8;height:57px;padding:4px}td.time{background:#fffaf6;text-align:center;color:#bf4a1a;font-weight:800;font-size:.82rem}td input,td textarea{border:1px solid transparent;border-radius:7px;width:100%;height:100%;min-height:42px;padding:6px;text-align:center;font:600 .82rem 'Segoe UI',sans-serif;color:#444;background:transparent;resize:none;white-space:pre-wrap}td textarea{line-height:1.2}td input:hover,td input:focus,td textarea:hover,td textarea:focus{background:#fff8f2;border-color:#f4a261;outline:none}.row-actions{display:flex;justify-content:center;margin:12px 0}.add-row{border:1px solid #f4a261;border-radius:9px;background:#fff;color:#bf4a1a;padding:9px 14px;font-weight:700;cursor:pointer}.save-note{text-align:center;color:#888;font-size:.74rem;min-height:20px;margin-top:8px}.page-footer{text-align:center;font-size:.7rem;color:#d4a88a;padding:10px 0 24px}@media(max-width:560px){.header h1{font-size:1.45rem}.container{padding:15px 9px 45px}.member-btn{padding:7px 14px}}
   </style>
 </head>
 <body>
-  <header class="header">
-    <a class="home-btn" href="home.html">← Home</a>
-    <h1>🎓 Calendario scolastico</h1>
-    <p>Orario settimanale di Valentina, Andrea e Matteo</p>
-  </header>
+  <header class="header"><a class="home-btn" href="home.html">← Home</a><h1>🎓 Calendario scolastico</h1><p>Orario settimanale di Valentina, Andrea e Matteo</p></header>
   <main class="container">
     <div class="status" id="sync-status" aria-live="polite">Connessione in corso…</div>
     <nav class="members" id="members" aria-label="Seleziona persona">
       <button class="member-btn active" data-member="valentina">🎓 Valentina</button>
-      <button class="member-btn" data-member="andrea">🏊 Andrea</button>
-      <button class="member-btn" data-member="matteo">🏀 Matteo</button>
+      <button class="member-btn" data-member="andrea">🏊‍♂️ Andrea</button>
+      <button class="member-btn" data-member="matteo">⚽ Matteo</button>
     </nav>
     <p class="hint">Seleziona una persona e modifica le lezioni nelle caselle. Le modifiche vengono salvate automaticamente in Firebase.</p>
-    <div class="table-wrap">
-      <table aria-label="Orario scolastico settimanale">
-        <thead><tr><th scope="col">Ora</th><th scope="col">Lunedì</th><th scope="col">Martedì</th><th scope="col">Mercoledì</th><th scope="col">Giovedì</th><th scope="col">Venerdì</th></tr></thead>
-        <tbody id="schedule-body"></tbody>
-      </table>
-    </div>
-    <div class="row-actions"><button class="add-row" id="add-row">＋ Aggiungi fascia oraria</button></div>
-    <div class="save-note" id="save-note" aria-live="polite"></div>
+    <div class="table-wrap"><table aria-label="Orario scolastico settimanale"><thead><tr><th>Ora</th><th>Lunedì</th><th>Martedì</th><th>Mercoledì</th><th>Giovedì</th><th>Venerdì</th></tr></thead><tbody id="schedule-body"></tbody></table></div>
+    <div class="row-actions"><button class="add-row" id="add-row">＋ Aggiungi fascia oraria</button></div><div class="save-note" id="save-note" aria-live="polite"></div>
   </main>
   <footer class="page-footer">🏠 Scamonzio &nbsp;•&nbsp; Calendario scolastico</footer>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
-      authDomain: "lista-spesa-b9eb1.firebaseapp.com",
-      databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "lista-spesa-b9eb1",
-      storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
-      messagingSenderId: "468690890938",
-      appId: "1:468690890938:web:048be7f27779d8862d9283"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const schedulesRef = db.ref('school-calendar');
-    const seedRef = db.ref('school-calendar-seeds/andrea-v1');
-    const matteoSeedRef = db.ref('school-calendar-seeds/matteo-v1');
-    const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
-    const blankDays = () => ['', '', '', '', ''];
-    const starter = [
-      { time:'08:00', days:['VP', 'VP', '', '1ª F (G109)', ''] },
-      { time:'08:50', days:['VP', 'VP', '', '2ª F', '1ª F (G109)'] },
-      { time:'09:50', days:['VP', '1ª F (G103)', '', 'POT', '2ª F'] },
-      { time:'10:50', days:['Parents', 'POT', '', '', ''] },
-      { time:'11:50', days:['', '', 'POT', '5ª L (F107)', ''] },
-      { time:'12:50', days:['', '5ª L (F105)', 'VP', '5ª L (COMM)', ''] },
-      { time:'13:50', days:['', '', '2ª F (G108)', '', ''] }
-    ];
-    const andreaStarter = [
-      { time:'08:00', days:['Latino\nFT08', 'Greco\nFT05', 'Sc. Motoria\nFT04 - Via B', 'Sc. Naturali\nFT08', 'Inglese\nFT07'] },
-      { time:'08:50', days:['Latino\nFT03', 'Sc. Naturali\nF108', 'Sc. Motore\nF102 - Via B', 'Latino\nF200', 'St. Arte\nFT03'] },
-      { time:'09:50', days:['Inglese\nFT01', 'Matematica\nF204', 'Fisica\nF204', 'Latino\nF200', 'Fil/Sto\nFT02'] },
-      { time:'10:50', days:['Fil/Sto\nFT02', 'Italiano\nFT03', 'Italiano\nFT06', 'Fisica\nF204', 'Fil/Sto\nFT02'] },
-      { time:'11:50', days:['Fil/Sto\nFT02', 'Italiano\nFT03', 'Italiano\nFT06', 'St. Arte\nF202', 'Greco\nFT05'] },
-      { time:'12:50', days:['Matematica\nF204', 'Fil/Sto\nFT02', 'Inglese\nF100', '', 'Greco\nFT05'] },
-      { time:'13:50', days:['', 'Fil/Sto\nFT02', '', '', ''] }
-    ];
-    const matteoStarter = [
-      { time:'08:00 - 8:50', days:['Matematica con Informatica', 'Matematica con Informatica', 'Italiano', 'Fisica', 'IRC'] },
-      { time:'8:50 - 9:45', days:['Matematica con Informatica', 'Matematica con Informatica', 'Italiano', 'Fisica', 'Latino'] },
-      { time:'9:45 - 10:35', days:['Scienze naturali', 'Disegno e Storia dell\'Arte', 'Inglese', 'Geostoria', 'Scienze motorie'] },
-      { time:'10:35 - 11:35', days:['Fisica', 'Italiano', 'Matematica con Informatica', 'Latino', 'Italiano - Geostoria'] },
-      { time:'11:35 - 12:25', days:['', '', '', '', ''] },
-      { time:'12:25 - 13:20', days:['Inglese', '', '', '', ''] }
-    ];
-    let schedules = {};
-    let selectedMember = 'valentina';
-    let initialized = false;
-    let saveTimer;
-
-    db.ref('.info/connected').on('value', snap => {
-      document.getElementById('sync-status').textContent = snap.val() ? '🟢 Sincronizzato in tempo reale' : '🔴 Offline — modifiche in attesa di connessione';
-    });
-
-    seedRef.once('value', seedSnap => {
-      if (seedSnap.val() !== true) {
-        schedulesRef.child('andrea').set(andreaStarter)
-          .then(() => seedRef.set(true));
-      }
-    });
-
-    matteoSeedRef.once('value', seedSnap => {
-      if (seedSnap.val() !== true) {
-        schedulesRef.child('matteo').set(matteoStarter)
-          .then(() => matteoSeedRef.set(true));
-      }
-    });
-
-    schedulesRef.on('value', snap => {
-      schedules = snap.val() || {};
-      initialized = true;
-      render();
-    }, () => {
-      document.getElementById('sync-status').textContent = '⚠️ Impossibile caricare il calendario';
-    });
-
-    document.getElementById('members').addEventListener('click', event => {
-      const button = event.target.closest('.member-btn');
-      if (!button) return;
-      selectedMember = button.dataset.member;
-      document.querySelectorAll('.member-btn').forEach(item => item.classList.toggle('active', item === button));
-      render();
-    });
-
-    document.getElementById('add-row').addEventListener('click', () => {
-      const current = getSchedule();
-      const lastTime = current.length ? current[current.length - 1].time : '13:20';
-      const next = new Date(`2000-01-01T${lastTime.split(' - ')[0] || '13:20'}`);
-      next.setMinutes(next.getMinutes() + 50);
-      const time = `${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`;
-      current.push({ time, days: blankDays() });
-      saveSchedule(current);
-    });
-
-    function normalizeSchedule(value) {
-      if (Array.isArray(value)) {
-        return value.filter(Boolean).map(row => ({
-          time: row.time || '',
-          days: days.map((_, i) => (row.days || [])[i] || '')
-        }));
-      }
-      if (value && typeof value === 'object') {
-        return Object.keys(value).sort((a, b) => Number(a) - Number(b)).map(key => {
-          const row = value[key] || {};
-          return {
-            time: row.time || '',
-            days: days.map((_, i) => (row.days || [])[i] || '')
-          };
-        });
-      }
-      return [];
-    }
-
-    function getSchedule() {
-      const stored = normalizeSchedule(schedules[selectedMember]);
-      if (stored.length > 0) return stored;
-      if (selectedMember === 'valentina') return starter.map(row => ({ time:row.time, days:[...row.days] }));
-      if (selectedMember === 'andrea') return andreaStarter.map(row => ({ time:row.time, days:[...row.days] }));
-      if (selectedMember === 'matteo') return matteoStarter.map(row => ({ time:row.time, days:[...row.days] }));
-      return [];
-    }
-
-    function render() {
-      if (!initialized) return;
-      const body = document.getElementById('schedule-body');
-      body.replaceChildren();
-      getSchedule().forEach((row, rowIndex) => {
-        const tr = document.createElement('tr');
-        const timeCell = document.createElement('td');
-        timeCell.className = 'time';
-        const timeInput = document.createElement('input');
-        timeInput.type = 'text';
-        timeInput.value = row.time;
-        timeInput.setAttribute('aria-label', `Ora della fascia ${rowIndex + 1}`);
-        timeInput.addEventListener('change', () => updateCell(rowIndex, 'time', timeInput.value));
-        timeCell.appendChild(timeInput);
-        tr.appendChild(timeCell);
-        days.forEach((day, dayIndex) => {
-          const td = document.createElement('td');
-          const input = document.createElement('textarea');
-          input.rows = 2;
-          input.maxLength = 80;
-          input.value = row.days[dayIndex];
-          input.placeholder = '—';
-          input.setAttribute('aria-label', `${day}, ${row.time || 'nuova fascia'}`);
-          input.addEventListener('change', () => updateCell(rowIndex, dayIndex, input.value.trim()));
-          td.appendChild(input);
-          tr.appendChild(td);
-        });
-        body.appendChild(tr);
-      });
-      if (getSchedule().length === 0) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 6;
-        td.textContent = 'Nessuna fascia oraria: usa “Aggiungi fascia oraria” per iniziare.';
-        td.style.cssText = 'text-align:center;color:#999;padding:22px;font-size:.85rem';
-        tr.appendChild(td);
-        body.appendChild(tr);
-      }
-    }
-
-    function updateCell(rowIndex, column, value) {
-      const current = getSchedule();
-      if (!current[rowIndex]) return;
-      if (column === 'time') current[rowIndex].time = value;
-      else current[rowIndex].days[column] = value;
-      saveSchedule(current);
-    }
-
-    function saveSchedule(schedule) {
-      schedules[selectedMember] = schedule;
-      document.getElementById('save-note').textContent = 'Salvataggio…';
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        schedulesRef.child(selectedMember).set(schedule)
-          .then(() => { document.getElementById('save-note').textContent = '✅ Orario salvato'; })
-          .catch(() => { document.getElementById('save-note').textContent = '❌ Salvataggio non riuscito — riprova'; });
-      }, 250);
-    }
+    const firebaseConfig={apiKey:'AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU',authDomain:'lista-spesa-b9eb1.firebaseapp.com',databaseURL:'https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app',projectId:'lista-spesa-b9eb1',storageBucket:'lista-spesa-b9eb1.firebasestorage.app',messagingSenderId:'468690890938',appId:'1:468690890938:web:048be7f27779d8862d9283'};firebase.initializeApp(firebaseConfig);const db=firebase.database(),schedulesRef=db.ref('school-calendar'),days=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì'];
+    const starter=[{time:'08:00',days:['VP','VP','','1ª F (G109)','']},{time:'08:50',days:['VP','VP','','2ª F','1ª F (G109)']},{time:'09:50',days:['VP','1ª F (G103)','','POT','2ª F']},{time:'10:50',days:['Parents','POT','','','']},{time:'11:50',days:['','','POT','5ª L (F107)','']},{time:'12:50',days:['','5ª L (F105)','VP','5ª L (COMM)','']},{time:'13:50',days:['','','2ª F (G108)','','']}];
+    const andreaStarter=[{time:'08:00',days:['Latino\nFT08','Greco\nFT05','Sc. Motoria\nFT04 - Via B','Sc. Naturali\nFT08','Inglese\nFT07']},{time:'08:50',days:['Latino\nFT03','Sc. Naturali\nF108','Sc. Motore\nF102 - Via B','Latino\nF200','St. Arte\nFT03']},{time:'09:50',days:['Inglese\nFT01','Matematica\nF204','Fisica\nF204','Latino\nF200','Fil/Sto\nFT02']},{time:'10:50',days:['Fil/Sto\nFT02','Italiano\nFT03','Italiano\nFT06','Fisica\nF204','Fil/Sto\nFT02']},{time:'11:50',days:['Fil/Sto\nFT02','Italiano\nFT03','Italiano\nFT06','St. Arte\nF202','Greco\nFT05']},{time:'12:50',days:['Matematica\nF204','Fil/Sto\nFT02','Inglese\nF100','','Greco\nFT05']},{time:'13:50',days:['','Fil/Sto\nFT02','','','']}];
+    const matteoStarter=[{time:'08:00 - 8:50',days:['Matematica con Informatica','Matematica con Informatica','Italiano','Fisica','IRC']},{time:'8:50 - 9:45',days:['Matematica con Informatica','Matematica con Informatica','Italiano','Fisica','Latino']},{time:'9:45 - 10:35',days:['Scienze naturali',"Disegno e Storia dell'Arte",'Inglese','Geostoria','Scienze motorie']},{time:'10:35 - 11:35',days:['Fisica','Italiano','Matematica con Informatica','Latino','Italiano - Geostoria']},{time:'11:35 - 12:25',days:['','','','','']},{time:'12:25 - 13:20',days:['Inglese','','','','']}];
+    let schedules={},selectedMember='valentina',initialized=false,saveTimer;
+    db.ref('.info/connected').on('value',s=>document.getElementById('sync-status').textContent=s.val()?'🟢 Sincronizzato in tempo reale':'🔴 Offline — modifiche in attesa di connessione');
+    schedulesRef.on('value',s=>{schedules=s.val()||{};initialized=true;render()},()=>document.getElementById('sync-status').textContent='⚠️ Impossibile caricare il calendario');
+    document.getElementById('members').addEventListener('click',e=>{const b=e.target.closest('.member-btn');if(!b)return;selectedMember=b.dataset.member;document.querySelectorAll('.member-btn').forEach(x=>x.classList.toggle('active',x===b));render()});
+    document.getElementById('add-row').addEventListener('click',()=>{const c=getSchedule(),last=c.length?c[c.length-1].time:'13:20',start=last.split(' - ')[0],n=new Date(`2000-01-01T${start}`);n.setMinutes(n.getMinutes()+50);c.push({time:`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`,days:['','','','','']});saveSchedule(c)});
+    function normalize(v){if(!Array.isArray(v))return[];return v.filter(Boolean).map(r=>({time:r.time||'',days:days.map((_,i)=>(r.days||[])[i]||'')}))}
+    function getSchedule(){const s=normalize(schedules[selectedMember]);if(s.length)return s;if(selectedMember==='valentina')return starter.map(r=>({time:r.time,days:[...r.days]}));if(selectedMember==='andrea')return andreaStarter.map(r=>({time:r.time,days:[...r.days]}));if(selectedMember==='matteo')return matteoStarter.map(r=>({time:r.time,days:[...r.days]}));return[]}
+    function render(){if(!initialized)return;const body=document.getElementById('schedule-body');body.replaceChildren();getSchedule().forEach((r,ri)=>{const tr=document.createElement('tr'),tc=document.createElement('td');tc.className='time';const ti=document.createElement('input');ti.type='text';ti.value=r.time;ti.addEventListener('change',()=>update(ri,'time',ti.value));tc.appendChild(ti);tr.appendChild(tc);days.forEach((d,di)=>{const td=document.createElement('td'),i=document.createElement('textarea');i.rows=2;i.maxLength=80;i.value=r.days[di];i.placeholder='—';i.addEventListener('change',()=>update(ri,di,i.value.trim()));td.appendChild(i);tr.appendChild(td)});body.appendChild(tr)})}
+    function update(ri,col,value){const c=getSchedule();if(!c[ri])return;if(col==='time')c[ri].time=value;else c[ri].days[col]=value;saveSchedule(c)}
+    function saveSchedule(s){schedules[selectedMember]=s;document.getElementById('save-note').textContent='Salvataggio…';clearTimeout(saveTimer);saveTimer=setTimeout(()=>schedulesRef.child(selectedMember).set(s).then(()=>document.getElementById('save-note').textContent='✅ Orario salvato').catch(()=>document.getElementById('save-note').textContent='❌ Salvataggio non riuscito — riprova'),250)}
   </script>
 </body>
 </html>
