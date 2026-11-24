@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎓 Calendario scolastico — Scamonzio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff8f0; min-height: 100vh; color: #333; }
+    .header { background: linear-gradient(160deg, #b5451b 0%, #e8621a 50%, #f4a261 100%); color: white; padding: 48px 20px 30px; text-align: center; position: relative; }
+    .home-btn { position:absolute; top:14px; left:14px; background:rgba(255,255,255,.88); color:#e8621a; border-radius:20px; padding:7px 14px; font-size:.82rem; font-weight:700; text-decoration:none; }
+    .header h1 { font-size:1.8rem; font-weight:900; }
+    .header p { font-size:.88rem; margin-top:7px; opacity:.92; }
+    .container { max-width:1000px; margin:0 auto; padding:20px 14px 56px; }
+    .status { text-align:center; font-size:.75rem; color:#777; margin:0 0 15px; }
+    .members { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:16px; }
+    .member-btn { border:2px solid transparent; border-radius:20px; padding:8px 18px; font-size:.9rem; font-weight:800; cursor:pointer; background:#fff; color:#555; box-shadow:0 2px 9px #b4501415; }
+    .member-btn.active { color:white; }
+    .member-btn[data-member="valentina"].active { background:#6a1b9a; }
+    .member-btn[data-member="andrea"].active { background:#1565c0; }
+    .member-btn[data-member="matteo"].active { background:#2e7d32; }
+    .hint { background:white; border:1px solid #fbd5b5; border-radius:12px; padding:11px 14px; color:#777; font-size:.78rem; line-height:1.5; margin-bottom:12px; }
+    .table-wrap { background:white; border-radius:15px; overflow-x:auto; box-shadow:0 3px 16px #b4501414; border:2px solid #fbd5b5; }
+    table { border-collapse:collapse; width:100%; min-width:690px; table-layout:fixed; }
+    th { background:#fff0e3; color:#bf4a1a; padding:12px 7px; font-size:.82rem; }
+    th:first-child { width:86px; }
+    td { border:1px solid #fde8d8; height:57px; padding:4px; }
+    td.time { background:#fffaf6; text-align:center; color:#bf4a1a; font-weight:800; font-size:.82rem; }
+    td input { border:1px solid transparent; border-radius:7px; width:100%; height:100%; min-height:42px; padding:6px; text-align:center; font:600 .82rem 'Segoe UI',sans-serif; color:#444; background:transparent; }
+    td input:hover, td input:focus { background:#fff8f2; border-color:#f4a261; outline:none; }
+    td input::placeholder { color:#d5c7be; font-weight:400; }
+    .row-actions { display:flex; justify-content:center; margin:12px 0; }
+    .add-row { border:1px solid #f4a261; border-radius:9px; background:white; color:#bf4a1a; padding:9px 14px; font-weight:700; cursor:pointer; }
+    .save-note { text-align:center; color:#888; font-size:.74rem; min-height:20px; margin-top:8px; }
+    .page-footer { text-align:center; font-size:.7rem; color:#d4a88a; padding:10px 0 24px; }
+    @media (max-width:560px) { .header h1 { font-size:1.45rem; } .container { padding:15px 9px 45px; } .member-btn { padding:7px 14px; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a class="home-btn" href="home.html">← Home</a>
+    <h1>🎓 Calendario scolastico</h1>
+    <p>Orario settimanale di Valentina, Andrea e Matteo</p>
+  </header>
+  <main class="container">
+    <div class="status" id="sync-status" aria-live="polite">Connessione in corso…</div>
+    <nav class="members" id="members" aria-label="Seleziona persona">
+      <button class="member-btn active" data-member="valentina">🎓 Valentina</button>
+      <button class="member-btn" data-member="andrea">🏊 Andrea</button>
+      <button class="member-btn" data-member="matteo">🏀 Matteo</button>
+    </nav>
+    <p class="hint">Seleziona una persona e inserisci le lezioni nelle caselle (es. “1ª F (G109)”). Le modifiche vengono salvate e sincronizzate con la famiglia. L’orario di Valentina parte dall’esempio fornito; puoi modificarlo liberamente.</p>
+    <div class="table-wrap">
+      <table aria-label="Orario scolastico settimanale">
+        <thead><tr><th scope="col">Ora</th><th scope="col">Lunedì</th><th scope="col">Martedì</th><th scope="col">Mercoledì</th><th scope="col">Giovedì</th><th scope="col">Venerdì</th></tr></thead>
+        <tbody id="schedule-body"></tbody>
+      </table>
+    </div>
+    <div class="row-actions"><button class="add-row" id="add-row">＋ Aggiungi fascia oraria</button></div>
+    <div class="save-note" id="save-note" aria-live="polite"></div>
+  </main>
+  <footer class="page-footer">🏠 Scamonzio &nbsp;•&nbsp; Calendario scolastico</footer>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAfOMeAkXUIandLUhCR8nfyELOPVRyD3WU",
+      authDomain: "lista-spesa-b9eb1.firebaseapp.com",
+      databaseURL: "https://lista-spesa-b9eb1-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "lista-spesa-b9eb1",
+      storageBucket: "lista-spesa-b9eb1.firebasestorage.app",
+      messagingSenderId: "468690890938",
+      appId: "1:468690890938:web:048be7f27779d8862d9283"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const schedulesRef = db.ref('school-calendar');
+    const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+    const blankDays = () => ['', '', '', '', ''];
+    const starter = [
+      { time:'08:00', days:['VP', 'VP', '', '1ª F (G109)', ''] },
+      { time:'08:50', days:['VP', 'VP', '', '2ª F', '1ª F (G109)'] },
+      { time:'09:50', days:['VP', '1ª F (G103)', '', 'POT', '2ª F'] },
+      { time:'10:50', days:['Parents', 'POT', '', '', ''] },
+      { time:'11:50', days:['', '', 'POT', '5ª L (F107)', ''] },
+      { time:'12:50', days:['', '5ª L (F105)', 'VP', '5ª L (COMM)', ''] },
+      { time:'13:50', days:['', '', '2ª F (G108)', '', ''] }
+    ];
+    let schedules = {};
+    let selectedMember = 'valentina';
+    let initialized = false;
+    let saveTimer;
+
+    db.ref('.info/connected').on('value', snap => {
+      document.getElementById('sync-status').textContent = snap.val() ? '🟢 Sincronizzato in tempo reale' : '🔴 Offline — modifiche in attesa di connessione';
+    });
+
+    schedulesRef.on('value', snap => {
+      schedules = snap.val() || {};
+      initialized = true;
+      render();
+    }, () => {
+      document.getElementById('sync-status').textContent = '⚠️ Impossibile caricare il calendario';
+    });
+
+    document.getElementById('members').addEventListener('click', event => {
+      const button = event.target.closest('.member-btn');
+      if (!button) return;
+      selectedMember = button.dataset.member;
+      document.querySelectorAll('.member-btn').forEach(item => item.classList.toggle('active', item === button));
+      render();
+    });
+
+    document.getElementById('add-row').addEventListener('click', () => {
+      const current = getSchedule();
+      const lastTime = current.length ? current[current.length - 1].time : '13:50';
+      const next = new Date(`2000-01-01T${lastTime || '13:50'}`);
+      next.setMinutes(next.getMinutes() + 50);
+      const time = `${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`;
+      current.push({ time, days: blankDays() });
+      saveSchedule(current);
+    });
+
+    function getSchedule() {
+      const stored = schedules[selectedMember];
+      if (Array.isArray(stored)) return stored.map(row => ({ time: row.time || '', days: days.map((_, i) => (row.days || [])[i] || '') }));
+      return selectedMember === 'valentina' ? starter.map(row => ({ time:row.time, days:[...row.days] })) : [];
+    }
+
+    function render() {
+      if (!initialized) return;
+      const body = document.getElementById('schedule-body');
+      body.replaceChildren();
+      getSchedule().forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        const timeCell = document.createElement('td');
+        timeCell.className = 'time';
+        const timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.value = row.time;
+        timeInput.setAttribute('aria-label', `Ora della fascia ${rowIndex + 1}`);
+        timeInput.addEventListener('change', () => updateCell(rowIndex, 'time', timeInput.value));
+        timeCell.appendChild(timeInput);
+        tr.appendChild(timeCell);
+        days.forEach((day, dayIndex) => {
+          const td = document.createElement('td');
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.maxLength = 80;
+          input.value = row.days[dayIndex];
+          input.placeholder = '—';
+          input.setAttribute('aria-label', `${day}, ${row.time || 'nuova fascia'}`);
+          input.addEventListener('change', () => updateCell(rowIndex, dayIndex, input.value.trim()));
+          td.appendChild(input);
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+      if (getSchedule().length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.textContent = 'Nessuna fascia oraria: usa “Aggiungi fascia oraria” per iniziare.';
+        td.style.cssText = 'text-align:center;color:#999;padding:22px;font-size:.85rem';
+        tr.appendChild(td);
+        body.appendChild(tr);
+      }
+    }
+
+    function updateCell(rowIndex, column, value) {
+      const current = getSchedule();
+      if (!current[rowIndex]) return;
+      if (column === 'time') current[rowIndex].time = value;
+      else current[rowIndex].days[column] = value;
+      saveSchedule(current);
+    }
+
+    function saveSchedule(schedule) {
+      schedules[selectedMember] = schedule;
+      document.getElementById('save-note').textContent = 'Salvataggio…';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        schedulesRef.child(selectedMember).set(schedule)
+          .then(() => { document.getElementById('save-note').textContent = '✅ Orario salvato'; })
+          .catch(() => { document.getElementById('save-note').textContent = '❌ Salvataggio non riuscito — riprova'; });
+      }, 250);
+    }
+  </script>
+</body>
+</html>
