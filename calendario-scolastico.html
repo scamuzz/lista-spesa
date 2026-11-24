@@ -26,9 +26,10 @@
     th:first-child { width:86px; }
     td { border:1px solid #fde8d8; height:57px; padding:4px; }
     td.time { background:#fffaf6; text-align:center; color:#bf4a1a; font-weight:800; font-size:.82rem; }
-    td input { border:1px solid transparent; border-radius:7px; width:100%; height:100%; min-height:42px; padding:6px; text-align:center; font:600 .82rem 'Segoe UI',sans-serif; color:#444; background:transparent; }
-    td input:hover, td input:focus { background:#fff8f2; border-color:#f4a261; outline:none; }
-    td input::placeholder { color:#d5c7be; font-weight:400; }
+    td input, td textarea { border:1px solid transparent; border-radius:7px; width:100%; height:100%; min-height:42px; padding:6px; text-align:center; font:600 .82rem 'Segoe UI',sans-serif; color:#444; background:transparent; resize:none; }
+    td textarea { line-height:1.2; }
+    td input:hover, td input:focus, td textarea:hover, td textarea:focus { background:#fff8f2; border-color:#f4a261; outline:none; }
+    td input::placeholder, td textarea::placeholder { color:#d5c7be; font-weight:400; }
     .row-actions { display:flex; justify-content:center; margin:12px 0; }
     .add-row { border:1px solid #f4a261; border-radius:9px; background:white; color:#bf4a1a; padding:9px 14px; font-weight:700; cursor:pointer; }
     .save-note { text-align:center; color:#888; font-size:.74rem; min-height:20px; margin-top:8px; }
@@ -76,6 +77,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const schedulesRef = db.ref('school-calendar');
+    const seedRef = db.ref('school-calendar-seeds/andrea-v1');
     const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
     const blankDays = () => ['', '', '', '', ''];
     const starter = [
@@ -87,15 +89,14 @@
       { time:'12:50', days:['', '5ª L (F105)', 'VP', '5ª L (COMM)', ''] },
       { time:'13:50', days:['', '', '2ª F (G108)', '', ''] }
     ];
-    const italianDays = () => ['Italiano', 'Italiano', 'Italiano', 'Italiano', 'Italiano'];
     const andreaStarter = [
-     { time:'08:00', days:['VP', 'VP', '', '1ª F (G109)', ''] },
-      { time:'08:50', days:['VP', 'VP', '', '2ª F', '1ª F (G109)'] },
-      { time:'09:50', days:['VP', '1ª F (G103)', '', 'POT', '2ª F'] },
-      { time:'10:50', days:['Parents', 'POT', '', '', ''] },
-      { time:'11:50', days:['', '', 'POT', '5ª L (F107)', ''] },
-      { time:'12:50', days:['', '5ª L (F105)', 'VP', '5ª L (COMM)', ''] },
-      { time:'13:50', days:['', '', '2ª F (G108)', '', ''] }
+      { time:'08:00', days:['Latino\nFT08', 'Greco\nFT05', 'Sc. Motoria\nFT04 - Via B', 'Sc. Naturali\nFT08', 'Inglese\nFT07'] },
+      { time:'08:50', days:['Latino\nFT03', 'Sc. Naturali\nF108', 'Sc. Motore\nF102 - Via B', 'Latino\nF200', 'St. Arte\nFT03'] },
+      { time:'09:50', days:['Inglese\nFT01', 'Matematica\nF204', 'Fisica\nF204', 'Latino\nF200', 'Fil/Sto\nFT02'] },
+      { time:'10:50', days:['Fil/Sto\nFT02', 'Italiano\nFT03', 'Italiano\nFT06', 'Fisica\nF204', 'Fil/Sto\nFT02'] },
+      { time:'11:50', days:['Fil/Sto\nFT02', 'Italiano\nFT03', 'Italiano\nFT06', 'St. Arte\nF202', 'Greco\nFT05'] },
+      { time:'12:50', days:['Matematica\nF204', 'Fil/Sto\nFT02', 'Inglese\nF100', '', 'Greco\nFT05'] },
+      { time:'13:50', days:['', 'Fil/Sto\nFT02', '', '', ''] }
     ];
     let schedules = {};
     let selectedMember = 'valentina';
@@ -107,21 +108,18 @@
       document.getElementById('sync-status').textContent = snap.val() ? '🟢 Sincronizzato in tempo reale' : '🔴 Offline — modifiche in attesa di connessione';
     });
 
+    seedRef.once('value', seedSnap => {
+      if (seedSnap.val() !== true) {
+        seedingAndrea = true;
+        schedulesRef.child('andrea').set(andreaStarter)
+          .then(() => seedRef.set(true))
+          .finally(() => { seedingAndrea = false; });
+      }
+    });
+
     schedulesRef.on('value', snap => {
       schedules = snap.val() || {};
       initialized = true;
-
-      const andreaRows = normalizeSchedule(schedules.andrea);
-      if (andreaRows.length === 0 && !seedingAndrea) {
-        seedingAndrea = true;
-        schedulesRef.child('andrea').set(andreaStarter)
-          .then(() => {
-            seedingAndrea = false;
-            document.getElementById('save-note').textContent = '✅ Orario di Andrea inizializzato';
-          })
-          .catch(() => { seedingAndrea = false; });
-      }
-
       render();
     }, () => {
       document.getElementById('sync-status').textContent = '⚠️ Impossibile caricare il calendario';
@@ -189,8 +187,8 @@
         tr.appendChild(timeCell);
         days.forEach((day, dayIndex) => {
           const td = document.createElement('td');
-          const input = document.createElement('input');
-          input.type = 'text';
+          const input = document.createElement('textarea');
+          input.rows = 2;
           input.maxLength = 80;
           input.value = row.days[dayIndex];
           input.placeholder = '—';
