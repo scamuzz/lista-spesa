@@ -78,6 +78,7 @@
     const db = firebase.database();
     const schedulesRef = db.ref('school-calendar');
     const seedRef = db.ref('school-calendar-seeds/andrea-v1');
+    const matteoSeedRef = db.ref('school-calendar-seeds/matteo-v1');
     const days = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
     const blankDays = () => ['', '', '', '', ''];
     const starter = [
@@ -98,11 +99,18 @@
       { time:'12:50', days:['Matematica\nF204', 'Fil/Sto\nFT02', 'Inglese\nF100', '', 'Greco\nFT05'] },
       { time:'13:50', days:['', 'Fil/Sto\nFT02', '', '', ''] }
     ];
+    const matteoStarter = [
+      { time:'08:00 - 8:50', days:['Matematica con Informatica', 'Matematica con Informatica', 'Italiano', 'Fisica', 'IRC'] },
+      { time:'8:50 - 9:45', days:['Matematica con Informatica', 'Matematica con Informatica', 'Italiano', 'Fisica', 'Latino'] },
+      { time:'9:45 - 10:35', days:['Scienze naturali', 'Disegno e Storia dell\'Arte', 'Inglese', 'Geostoria', 'Scienze motorie'] },
+      { time:'10:35 - 11:35', days:['Fisica', 'Italiano', 'Matematica con Informatica', 'Latino', 'Italiano - Geostoria'] },
+      { time:'11:35 - 12:25', days:['', '', '', '', ''] },
+      { time:'12:25 - 13:20', days:['Inglese', '', '', '', ''] }
+    ];
     let schedules = {};
     let selectedMember = 'valentina';
     let initialized = false;
     let saveTimer;
-    let seedingAndrea = false;
 
     db.ref('.info/connected').on('value', snap => {
       document.getElementById('sync-status').textContent = snap.val() ? '🟢 Sincronizzato in tempo reale' : '🔴 Offline — modifiche in attesa di connessione';
@@ -110,10 +118,15 @@
 
     seedRef.once('value', seedSnap => {
       if (seedSnap.val() !== true) {
-        seedingAndrea = true;
         schedulesRef.child('andrea').set(andreaStarter)
-          .then(() => seedRef.set(true))
-          .finally(() => { seedingAndrea = false; });
+          .then(() => seedRef.set(true));
+      }
+    });
+
+    matteoSeedRef.once('value', seedSnap => {
+      if (seedSnap.val() !== true) {
+        schedulesRef.child('matteo').set(matteoStarter)
+          .then(() => matteoSeedRef.set(true));
       }
     });
 
@@ -135,8 +148,8 @@
 
     document.getElementById('add-row').addEventListener('click', () => {
       const current = getSchedule();
-      const lastTime = current.length ? current[current.length - 1].time : '13:50';
-      const next = new Date(`2000-01-01T${lastTime || '13:50'}`);
+      const lastTime = current.length ? current[current.length - 1].time : '13:20';
+      const next = new Date(`2000-01-01T${lastTime.split(' - ')[0] || '13:20'}`);
       next.setMinutes(next.getMinutes() + 50);
       const time = `${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`;
       current.push({ time, days: blankDays() });
@@ -167,6 +180,7 @@
       if (stored.length > 0) return stored;
       if (selectedMember === 'valentina') return starter.map(row => ({ time:row.time, days:[...row.days] }));
       if (selectedMember === 'andrea') return andreaStarter.map(row => ({ time:row.time, days:[...row.days] }));
+      if (selectedMember === 'matteo') return matteoStarter.map(row => ({ time:row.time, days:[...row.days] }));
       return [];
     }
 
@@ -179,7 +193,7 @@
         const timeCell = document.createElement('td');
         timeCell.className = 'time';
         const timeInput = document.createElement('input');
-        timeInput.type = 'time';
+        timeInput.type = 'text';
         timeInput.value = row.time;
         timeInput.setAttribute('aria-label', `Ora della fascia ${rowIndex + 1}`);
         timeInput.addEventListener('change', () => updateCell(rowIndex, 'time', timeInput.value));
